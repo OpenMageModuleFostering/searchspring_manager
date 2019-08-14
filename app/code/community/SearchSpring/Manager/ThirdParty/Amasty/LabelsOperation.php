@@ -14,7 +14,7 @@
  */
 class SearchSpring_Manager_ThirdParty_Amasty_LabelsOperation extends SearchSpring_Manager_Operation_Product
 {
-	const FEED_LABEL = 'Amasty_Label_product_labels_html';
+	const FEED_LABEL = 'amasty_label_product_labels_html';
 
 	/**
 	 * Add label HTML

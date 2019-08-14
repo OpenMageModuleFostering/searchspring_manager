@@ -31,10 +31,7 @@ class SearchSpring_Manager_Operation_Product_SetReport extends SearchSpring_Mana
 	const FEED_ORDERS_COUNT	= 'report_orders_count';
 	const FEED_ORDERS_QTY	= 'report_orders_qty';
 
-	// Default timespan, 1 year, so we don't accidentally overload their database
-	const DEFAULT_REPORT_TIMESPAN = '1 year';
-
-	public function prepare(Mage_Catalog_Model_Resource_Product_Collection $productCollection) {
+	public function prepare($productCollection) {
 
 		$this->fetchReportData(
 			$productCollection->getAllIds(),
@@ -81,14 +78,14 @@ class SearchSpring_Manager_Operation_Product_SetReport extends SearchSpring_Mana
 	public function getProductReport(Mage_Catalog_Model_Product $product) {
 
 		// Make sure we have report data
-		if (!$this->_reportData) {
+		if (is_null($this->_reportData)) {
 			// If we don't have data, then we'll fetch it with the requested product
 			// NOTE: This should only happen if the person using the class didn't request
 			// preparation with a product collection
 			$this->fetchReportData(array($product->getId()), $product->getStoreId());
 
 			// If we still don't have the data, then we can't support this feature
-			if (!$this->_reportData) {
+			if (is_null($this->_reportData)) {
 				return false;
 			}
 		}
@@ -169,14 +166,29 @@ class SearchSpring_Manager_Operation_Product_SetReport extends SearchSpring_Mana
 		return $reportCollection;
 	}
 
-	// TODO -- Figure out how to add from and to dates as parameters, might need to add them as configuration items as well
 	public function getParamReportStartDate() {
-		return date('Y-m-d H:i:s', strtotime('-' . self::DEFAULT_REPORT_TIMESPAN));
+
+		$fromTime = strtotime('-' . $this->getTimespan());
+
+		// If we can't convert the timespan to a time, we can't do anything with it
+		if ($fromTime === false) {
+			// TODO -- log when we have a debug logger
+			// Mage::helper('searchspring_manager/debug')->log("Can't convert timespan to time: " . $this->getTimespan());
+			return '';
+		}
+
+		return date('Y-m-d H:i:s', $fromTime);
 	}
 
 	public function getParamReportEndDate() {
+
 		// Up till now
 		return date('Y-m-d H:i:s');
+	}
+
+	public function getTimespan() {
+		$timespan = $this->getParameter('timespan');
+		return implode(' ', explode(',', $timespan) );
 	}
 
 }

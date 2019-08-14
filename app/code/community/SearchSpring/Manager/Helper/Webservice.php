@@ -16,47 +16,62 @@ class SearchSpring_Manager_Helper_Webservice extends Mage_Core_Helper_Abstract
 	const PATH_FEED_AUTH_METHOD_SET		= "/api/manage/feeds/auth-method/%s/set.json";
 	const PATH_FEED_AUTH_METHOD_VERIFY	= "/api/manage/feeds/auth-method/%s/verify.json";
 
+	const PATH_FEED_SETTINGS_URL_SET	= "/api/manage/feeds/settings/indexing-urls";
+
 	// SearchSpring Specific Authentication Codes
 	const AUTH_METHOD_SIMPLE	= 'simple';
 	const AUTH_METHOD_OAUTH		= 'o-auth';
 
-	public function verifyMageAPIAuthSimple() {
+	protected $_apiBaseUrl;
+
+	/**
+	 * Convenience Functions for calling the webservice
+	 */
+
+	public function verifyMageAPIAuthSimple($feedId, $creds) {
 		$path = sprintf(self::PATH_FEED_AUTH_METHOD_VERIFY, self::AUTH_METHOD_SIMPLE);
-		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForSimple());
+		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForSimple($feedId), $creds);
 		return $this->isResponseStatusSuccess($response);
 	}
 
-	public function registerMageAPIAuthSimple() {
+	public function registerMageAPIAuthSimple($feedId, $creds) {
 		$path = sprintf(self::PATH_FEED_AUTH_METHOD_SET, self::AUTH_METHOD_SIMPLE);
-		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForSimple());
-		return $this->isResponseSuccess($response);
+		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForSimple($feedId), $creds);
+		$this->ensureResponseSuccess($response, __FUNCTION__);
 	}
 
-	public function verifyMageAPIAuthOAuth() {
+	public function verifyMageAPIAuthOAuth($feedId, $creds) {
 		$path = sprintf(self::PATH_FEED_AUTH_METHOD_VERIFY, self::AUTH_METHOD_OAUTH);
-		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForOAuth());
+		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForOAuth($feedId), $creds);
 		return $this->isResponseStatusSuccess($response);
 	}
 
-	public function registerMageAPIAuthOAuth() {
+	public function registerMageAPIAuthOAuth($feedId, $creds) {
 		$path = sprintf(self::PATH_FEED_AUTH_METHOD_SET, self::AUTH_METHOD_OAUTH);
-		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForOAuth());
-		return $this->isResponseSuccess($response);
+		$response = $this->callSearchSpringWebservice($path, $this->getAuthMethodParamsForOAuth($feedId), $creds);
+		$this->ensureResponseSuccess($response, __FUNCTION__);
 	}
 
-	public function callSearchSpringWebservice($path, $params = array()) {
+	public function registerMageAPIUrls($feedId, $creds, $feedUrl, $batchUrl, $liveUrl) {
+		$params = array(
+			'feedId'	=> $feedId,
+			'feedUrl'	=> $feedUrl,
+			'batchUrl'	=> $batchUrl,
+			'liveUrl'	=> $liveUrl,
+		);
+		$response = $this->callSearchSpringWebservice(
+			self::PATH_FEED_SETTINGS_URL_SET,
+			$params, $creds
+		);
+		$this->ensureResponseSuccess($response, __FUNCTION__);
+	}
 
-		$hlp = Mage::helper('searchspring_manager');
+	/**
+	 * Easy generic way to make a request to the SearchSpring API
+	 */
+	public function callSearchSpringWebservice($path, $params = array(), SearchSpring_Manager_Entity_Credentials $creds = null) {
 
-		$apiHost = $hlp->getApiBaseUrl();
-		$siteId  = $hlp->getApiSiteId();
-		$secret  = $hlp->getApiSecretKey();
-		$feedId  = $hlp->getApiFeedId();
-
-		if (empty($apiHost) || empty($siteId) || empty($secret) || empty($feedId)) {
-			// Can't do much without these first
-			return false;
-		}
+		$apiHost = $this->getApiBaseUrl();
 
 		$url = $apiHost . $path;
 
@@ -64,9 +79,12 @@ class SearchSpring_Manager_Helper_Webservice extends Mage_Core_Helper_Abstract
 			'maxredirects' => 0,
 			'timeout'=>30
 		));
-		$client->setAuth($siteId, $secret);
 
-		$params = array_merge(array('feedId' => $feedId), $params);
+		// If credentials were provided
+		if ($creds) {
+			// ... add them as basic auth
+			$client->setAuth( $creds->getUsername(), $creds->getPassword() );
+		}
 
 		$client->setParameterGet($params);
 
@@ -90,12 +108,28 @@ class SearchSpring_Manager_Helper_Webservice extends Mage_Core_Helper_Abstract
 		return true;
 	}
 
-	protected function getAuthMethodParamsForSimple() {
-		// Nothing needed
-		return array();
+	protected function ensureResponseSuccess($response, $context = null) {
+		if (!$this->isResponseSuccess($response)) {
+			$message = '';
+			if ($context) {
+				$message .= $context . ': ';
+			}
+			$message .= 'SearchSpring webservice response returned non-success response';
+			if (is_object($response)) {
+				$message .= ': ' . $response->getBody();
+			}
+			throw new Exception($message);
+		}
 	}
 
-	protected function getAuthMethodParamsForOAuth() {
+	protected function getAuthMethodParamsForSimple($feedId) {
+		// Nothing else needed
+		return array(
+			'feedId' => $feedId,
+		);
+	}
+
+	protected function getAuthMethodParamsForOAuth($feedId) {
 
 		$oahlp = Mage::helper('searchspring_manager/oauth');
 		if (!($consumer = $oahlp->getConsumer())) {
@@ -106,10 +140,27 @@ class SearchSpring_Manager_Helper_Webservice extends Mage_Core_Helper_Abstract
 		$cSecret = $consumer->getSecret();
 
 		return array(
+			'feedId' => $feedId,
 			'consumerKey' => $cKey,
 			'consumerSecret' => $cSecret,
 			'type' => 'magento_indexing',
 		);
+	}
+
+	/**
+	 * To allow caller to specify a different API base URL
+	 */
+
+	public function getApiBaseUrl() {
+		if (empty($this->_apiBaseUrl)) {
+			return Mage::helper('searchspring_manager')->getApiBaseUrl();
+		}
+		return $this->_apiBaseUrl;
+	}
+
+	public function setApiBaseUrl($url) {
+		$this->_apiBaseUrl = $url;
+		return $this;
 	}
 
 }

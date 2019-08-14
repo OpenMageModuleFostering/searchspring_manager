@@ -14,9 +14,16 @@
  */
 class SearchSpring_Manager_Factory_SearchRequestBodyFactory
 {
+
     public function make()
     {
-        $requestBody = new SearchSpring_Manager_Entity_SearchRequestBody();
+		// Build using the site Id of the current magento store
+		$siteId = Mage::helper('searchspring_manager')->getApiSiteId( Mage::app()->getStore() );
+		if (null === $siteId) {
+			throw new UnexpectedValueException('SearchSpring: Site ID must be set to create a search request, none found for store: ' . Mage::app()->getStore()->getCode());
+		}
+
+        $requestBody = new SearchSpring_Manager_Entity_SearchRequestBody($siteId);
         return $requestBody;
     }
 }

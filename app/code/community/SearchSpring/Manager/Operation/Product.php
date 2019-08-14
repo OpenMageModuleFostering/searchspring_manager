@@ -122,14 +122,14 @@ abstract class SearchSpring_Manager_Operation_Product implements SearchSpring_Ma
     /**
      * {@inheritdoc}
      */
-	public function prepareCollection(Mage_Catalog_Model_Resource_Product_Collection $productCollection) {
+	public function prepareCollection($productCollection) {
 		return $this;
 	}
 
     /**
      * {@inheritdoc}
      */
-	public function prepare(Mage_Catalog_Model_Resource_Product_Collection $productCollection) {
+	public function prepare($productCollection) {
 		return $this;
 	}
 

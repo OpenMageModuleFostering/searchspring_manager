@@ -24,13 +24,14 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 	const FEED_QUANTITY = 'quantity';
 	const FEED_IN_STOCK = 'in_stock';
 	const FEED_WEIGHT = 'weight';
-	const FEED_MANUFACTURER = 'manufacturer';
 	const FEED_URL = 'url';
 	const FEED_NAME = 'name';
 	const FEED_CHILD_QUANTITY = 'child_quantity';
 	const FEED_CHILD_SKU = 'child_sku';
 	const FEED_CHILD_NAME = 'child_name';
 	const FEED_DAYS_OLD = 'days_old';
+	const FEED_VISIBILITY_IN_SEARCH = 'visible_in_search';
+	const FEED_VISIBILITY_IN_CATALOG = 'visible_in_catalog';
 	/**#@-*/
 
 
@@ -55,6 +56,8 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 	 *	 - child_name
 	 *	 - child_sku
 	 *	 - days_old
+	 *	 - visible_in_search
+	 *	 - visible_in_catalog
 	 *
 	 * @param Mage_Catalog_Model_Product $product
 	 *
@@ -70,7 +73,6 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 		$this->getRecords()->set(self::FEED_PRODUCT_TYPE, $product->getData('type_id'));
 		$this->getRecords()->set(self::FEED_QUANTITY, number_format($this->getQuantity($product)));
 		$this->getRecords()->set(self::FEED_WEIGHT, number_format((double)$product->getWeight(), 2));
-		$this->getRecords()->set(self::FEED_MANUFACTURER, $phlp->getAttributeText($product, 'manufacturer'));
 		$this->getRecords()->set(self::FEED_URL, $webBaseUrl . $product->getUrlPath());
 
 		$stockItem = $product->getStockItem();
@@ -86,6 +88,8 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 		$this->setChildQuantity($product);
 
 		$this->setDaysOld($product);
+
+		$this->setVisibility($product);
 
 		return $this;
 	}
@@ -182,4 +186,17 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 
 		return $quantity;
 	}
+
+	private function setVisibility($product) {
+
+		$vis = Mage::getSingleton('catalog/product_visibility');
+
+		$searchFl = in_array($product->getVisibility(), $vis->getVisibleInSearchIds());
+		$catalogFl = in_array($product->getVisibility(), $vis->getVisibleInCatalogIds());
+
+		$this->getRecords()->set(self::FEED_VISIBILITY_IN_SEARCH, (int) $searchFl);
+		$this->getRecords()->set(self::FEED_VISIBILITY_IN_CATALOG, (int) $catalogFl);
+
+	}
+
 }

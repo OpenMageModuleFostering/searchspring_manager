@@ -8,25 +8,27 @@
 /**
  * Class SearchSpring_Manager_Model_Observer_ProductSaveObserver
  *
- * Listens for product save events and pushes ids to api
+ * Listens for product change events and forwards to the Live Indexing Service
  *
  * @author Nate Brunette <nate@b7interactive.com>
+ * @author Jake Shelby <jake@b7interactive.com>
  */
-class SearchSpring_Manager_Model_Observer_ProductSaveObserver extends  SearchSpring_Manager_Model_Observer_LiveIndexer
+class SearchSpring_Manager_Model_Observer_ProductSaveObserver extends SearchSpring_Manager_Model_Observer
 {
 
 	/**
-	 * Creates a request body
+	 * Live Indexer Service
 	 *
-	 * @var SearchSpring_Manager_Factory_IndexingRequestBodyFactory
+	 * @var SearchSpring_Manager_Service_LiveIndexer $liveIndexer
 	 */
-	private $requestBodyFactory;
+	private $liveIndexer;
 
 	/**
-	 * List of parentIds for the updated product.
-	 * @var array
+	 * Deletion Tokens queue
+	 *
+	 * @var SearchSpring_Manager_Entity_ProductDeletionToken[] $deletionTokens
 	 */
-	protected $_productIds = array();
+	protected $deletionTokens = array();
 
 	/**
 	 * Constructor
@@ -35,149 +37,93 @@ class SearchSpring_Manager_Model_Observer_ProductSaveObserver extends  SearchSpr
 	 */
 	public function __construct()
 	{
-		$this->requestBodyFactory = new SearchSpring_Manager_Factory_IndexingRequestBodyFactory();
+		$factory = new SearchSpring_Manager_Factory_LiveIndexerFactory;
+		$this->liveIndexer = $factory->make();
+	}
+
+	/**
+	* Before a product is deleted obtain a token for deletion
+	*
+	* @param Varien_Event_Observer $productEvent The product event data
+	* @return void
+	*/
+	public function beforeDeletePushProduct(Varien_Event_Observer $productEvent)
+	{
+		try {
+
+			$product = $productEvent->getProduct();
+
+			// If we haven't already obtained a token...
+			if (!isset($this->deletionTokens[$product->getId()])) {
+
+				// Queue up a token, for after the product has been deleted
+				$this->deletionTokens[$product->getId()] =
+					$this->liveIndexer->obtainProductDeletionToken($product);
+
+			}
+
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
+	}
+
+	/**
+	 * After a product is deleted, push that product deletion token to the indexer service
+	 *
+	 * @param Varien_Event_Observer $productEvent The product event data
+	 * @return void
+	 */
+	public function afterDeletePushProduct(Varien_Event_Observer $productEvent)
+	{
+		try {
+
+			$product = $productEvent->getProduct();
+
+			// If we haven't already obtained a token...
+			if (isset($this->deletionTokens[$product->getId()])) {
+
+				$token = $this->deletionTokens[$product->getId()];
+				$this->liveIndexer->productDeleted($token);
+
+			}
+
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
 	}
 
 	/**
 	 * After a product is saved, push that product to the SearchSpring API
 	 *
 	 * @param Varien_Event_Observer $productEvent The product event data
-	 *
-	 * @return bool
+	 * @return void
 	 */
 	public function afterSavePushProduct(Varien_Event_Observer $productEvent)
 	{
-		if (!$this->isEnabled()) {
-			return true;
+		try {
+
+			$product = $productEvent->getProduct();
+
+			// TODO ? should there be more logic to verify that an actual change to data was made ?
+
+			$this->liveIndexer->productSaved($product);
+
+		} catch (Exception $e) {
+			$this->handleException($e);
 		}
-
-		$product = $productEvent->getData('product');
-		$this->_productIds = $this->_getProductIds($product);
-
-		$this->_handleProductChange();
-		return true;
 	}
 
-	/**
-	* Before a product is deleted grab all IDs
-	*
-	* @param Varien_Event_Observer $productEvent The product event data
-	*
-	* @return bool
-	*/
-	public function beforeDeletePushProduct(Varien_Event_Observer $productEvent) {
-
-		if (!$this->isEnabled()) {
-			return true;
-		}
-
-		$product = $productEvent->getData('product');
-		$this->_productIds = $this->_getProductIds($product);
-		return true;
-	}
-
-	/**
-	 * After a product is deleted, push that product delete to the SearchSpring API
-	 *
-	 * @param Varien_Event_Observer $productEvent The product event data
-	 *
-	 * @return bool
-	 */
-	public function afterDeletePushProduct(Varien_Event_Observer $productEvent)
+	protected function handleException(Exception $e)
 	{
-		if (!$this->isEnabled()) {
-			return true;
-		}
+		// TODO - is there a mage exception we can catch to send a better message to admin??
 
-		$this->_handleProductChange();
-		return true;
+		// Get some kind of context info
+
+		// log what happened
+		Mage::logException($e);
+
+		// Get the best message for the admin user, and notify
+		$this->notifyAdminUser("SearchSpring: There was a live indexing issue, please contact SearchSpring support for assistance.");
 	}
 
-	protected function _handleProductChange() {
-		$productIds = $this->_getActions();
-
-		// create the request body with product ids
-		if(!empty($productIds['delete'])) {
-			$requestBody = $this->requestBodyFactory->make(
-				SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_PRODUCT,
-				$productIds['delete'],
-				true
-			);
-		}
-
-		// create the request body with product ids
-		if(!empty($productIds['update'])) {
-			$requestBody = $this->requestBodyFactory->make(
-				SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_PRODUCT,
-				$productIds['update']
-			);
-		}
-
-		// send ids to api
-		$this->apiPushProductIds($requestBody);
-
-		return true;
-	}
-
-	protected function _getProductIds($product) {
-		$productIds = array();
-		// If the product is a simple product we may need to check its parent(s)
-		if($product->getTypeId() == "simple"){
-			// Check for configurable parent
-			$productIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
-
-			// If there are no configurable parents check grouped
-			if(empty($productIds)) {
-				$productIds = Mage::getModel('catalog/product_type_grouped')->getParentIdsByChild($product->getId());
-			}
-		}
-
-		$productIds[] = $product->getId();
-
-		return $productIds;
-	}
-
-
-	/**
-	 * Get list of update/deletes for product and parents.
-	 *
-	 * @param Mage_Catalog_Model_Product $product The product being updated
-	 *
-	 * @return array
-	 */
-	protected function _getActions() {
-		$productActions = array();
-
-		$validator = new SearchSpring_Manager_Validator_ProductValidator();
-
-		// Figure out deletes
-		foreach($this->_productIds as $productId) {
-			$product = Mage::getModel('catalog/product')->load($productId);
-
-			$isValid = $validator->isValid(
-				$product
-			);
-
-			if(!$isValid) {
-				$productActions['delete'][] = $productId;
-			} else {
-				$pricingStrategy = SearchSpring_Manager_Factory_PricingFactory::make($product);
-				$pricingStrategy->calculatePrices();
-
-				// Only check should delete if the product is otherwise valid
-				$shouldDelete = $validator->shouldDelete(
-					$product,
-					$pricingStrategy
-				);
-
-				if($shouldDelete) {
-					$productActions['delete'][] = $productId;
-				} else {
-					$productActions['update'][] = $productId;
-				}
-			}
-		}
-
-		return $productActions;
-	}
 }

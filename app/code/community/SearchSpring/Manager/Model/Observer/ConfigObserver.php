@@ -11,9 +11,23 @@
  * On a category change, trigger one of these methods
  *
  */
-class SearchSpring_Manager_Model_Observer_ConfigObserver {
+class SearchSpring_Manager_Model_Observer_ConfigObserver extends SearchSpring_Manager_Model_Observer
+{
 
 	const NEW_CONNECTION_SETUP_PARAM = 'searchspring_new_connection_fl';
+
+	public function hasNewConnectionBeenSetup() {
+		$param = Mage::app()->getRequest()->getParam(self::NEW_CONNECTION_SETUP_PARAM);
+		return (bool) $param;
+	}
+
+	public function getStore() {
+		$configModel = Mage::getSingleton('adminhtml/config_data');
+		if ($store = $configModel->getStore()) {
+			return Mage::app()->getStore($store);
+		}
+		return null;
+	}
 
 	public function afterSystemConfigSectionChanged(Varien_Event_Observer $event) {
 
@@ -24,25 +38,25 @@ class SearchSpring_Manager_Model_Observer_ConfigObserver {
 			return;
 		}
 
-		if ($this->hasNewConnectionBeenSetup()) {
+		// Get the store context configuration being edited
+		$store = $this->getStore();
+
+		if ($this->hasNewConnectionBeenSetup() && $store) {
 
 			// TODO - should we require admin permissions here
 
 			try {
 
 				// Initialize Resources needed for auth method
-				$this->_initializeAuthMethod();
+				$this->_initializeAuthMethod($store);
 
-				// Register Auth Method With Search Spring API
-				$this->_registerAuthMethodWithSearchSpring();
+				// Register store/authType specific urls with Search Spring
+				$this->_registerWithSearchSpring($store);
 
 			} catch (Exception $e) {
 
 				Mage::logException($e);
-
-				$message = $hlp->__('There was a problem while attempting to setup your SearchSpring account [E938]');
-				$session = Mage::getSingleton('adminhtml/session');
-				$session->addWarning($message);
+				$this->notifyAdminUser('There was a problem while attempting to setup your SearchSpring account [E938]');
 
 			}
 
@@ -50,27 +64,20 @@ class SearchSpring_Manager_Model_Observer_ConfigObserver {
 
 	}
 
-	public function hasNewConnectionBeenSetup() {
-		$param = Mage::app()->getRequest()->getParam(self::NEW_CONNECTION_SETUP_PARAM);
-		return (bool) $param;
-	}
-
-	protected function _initializeAuthMethod() {
-
+	protected function _initializeAuthMethod($store) {
 		$hlp = Mage::helper('searchspring_manager');
-		switch ($hlp->getAuthenticationMethod()) {
 
-			case SearchSpring_Manager_Helper_Data::AUTH_METHOD_SIMPLE:
+		switch ($hlp->getAuthenticationMethod($store)) {
+
+			case SearchSpring_Manager_Model_Config::AUTH_METHOD_SIMPLE:
 				// Nothing to initialize for this auth method
 				break;
 
-			case SearchSpring_Manager_Helper_Data::AUTH_METHOD_OAUTH:
+			case SearchSpring_Manager_Model_Config::AUTH_METHOD_OAUTH:
 				// Initialize oAuth Resources for API access
 				$this->_initializeOAuthResources();
 				break;
-
 		}
-
 	}
 
 	protected function _initializeOAuthResources() {
@@ -78,17 +85,12 @@ class SearchSpring_Manager_Model_Observer_ConfigObserver {
 		$oahlp->ensureOAuthResourcesInitialized();
 	}	
 
-	protected function _registerAuthMethodWithSearchSpring() {
+	protected function _registerWithSearchSpring($store) {
 
-		$success = Mage::helper('searchspring_manager')
-			->registerMagentoAPIAuthenticationWithSearchSpring();
+		$hlp = Mage::helper('searchspring_manager');
 
-		if (!$success) {
-			$hlp = Mage::helper('core');
-			$message = $hlp->__('There was a problem while attempting to setup your SearchSpring account [E939]');
-			$session = Mage::getSingleton('adminhtml/session');
-			$session->addWarning($message);
-		}
+		// Register Store configuration With Search Spring
+		$hlp->registerMagentoAPIWithSearchSpring($store);
 
 	}
 

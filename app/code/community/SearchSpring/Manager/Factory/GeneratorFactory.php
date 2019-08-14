@@ -83,7 +83,8 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 					throw new InvalidArgumentException('Ids must be an array');
 				}
 
-				$validator = new SearchSpring_Manager_Validator_ProductValidator();
+				$hlp = Mage::helper('searchspring_manager');
+				$validator = new SearchSpring_Manager_Validator_ProductValidator($hlp->getConfig());
 
 				// get product ids for each category
 				$productIds = array();
@@ -133,6 +134,8 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 		SearchSpring_Manager_Entity_OperationsCollection $operationsCollection,
 		SearchSpring_Manager_Entity_RecordsCollection $productRecords
 	) {
+		$hlp = Mage::helper('searchspring_manager');
+
 		$operationsBuilder->setSanitizer(new SearchSpring_Manager_String_Sanitizer())
 			->setRecords($productRecords)
 			->setClassPrefix(SearchSpring_Manager_Operation_Product::OPERATION_CLASS_PREFIX);
@@ -142,13 +145,20 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 		$operationsCollection->append($operationsBuilder->build('SetImages'));
 		$operationsCollection->append($operationsBuilder->build('SetOptions'));
 		$operationsCollection->append($operationsBuilder->build('SetCategories'));
-		$operationsCollection->append($operationsBuilder->build('SetReport'));
+
+		// Parameter for timespan comes from user configuration, by default
+		$operationsCollection->append($operationsBuilder->build('SetReport',
+				array(
+					'timespan' => $hlp->getSalesRankTimespan(),
+				)
+			)
+		);
 
 		// add pricing factory and if we should display zero priced products as additional data
 		$operationsCollection->append($operationsBuilder->build('SetPricing',
 				array(
 					'pricingFactory' => new SearchSpring_Manager_Factory_PricingFactory(),
-					'displayZeroPrice' => (int)Mage::helper('searchspring_manager')->isZeroPriceIndexingEnabled(),
+					'displayZeroPrice' => (int)$hlp->isZeroPriceIndexingEnabled(),
 				)
 			)
 		);

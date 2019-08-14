@@ -11,12 +11,6 @@ class SearchSpring_Manager_Model_Api2_Indexing_Rest_Admin_V1 extends Mage_Api2_M
 	 */
 	const COUNT_DEFAULT = 100;
 
-	/**
-	 * Default store if no parameter is set
-	 */
-	const STORE_DEFAULT = 'default';
-
-
 	// Live Indexing
 	public function _create()
 	{
@@ -48,9 +42,6 @@ class SearchSpring_Manager_Model_Api2_Indexing_Rest_Admin_V1 extends Mage_Api2_M
 	 */
 	public function fetchById()
 	{
-		// TODO can we get rid of the SearchSpring_Manager_Request_JSON object?
-//		$request = new SearchSpring_Manager_Request_JSON($this->getRequest());
-
 		$request = $this->getRequest()->getBodyParams();
 
 		if(!is_array($request)) {
@@ -95,15 +86,10 @@ class SearchSpring_Manager_Model_Api2_Indexing_Rest_Admin_V1 extends Mage_Api2_M
 			return;
 		}
 
-		if(empty($request['store'])) {
-			$request['store'] = self::STORE_DEFAULT;
-		}
-		$store = $request['store'];
-
 		$requestParams =  new SearchSpring_Manager_Entity_RequestParams(
 			(int)$request['size'],
 			(int)$request['start'],
-			$store
+			$this->_getStore()->getCode()
 		);
 
 		$params = array('ids' => $ids);
@@ -148,7 +134,7 @@ class SearchSpring_Manager_Model_Api2_Indexing_Rest_Admin_V1 extends Mage_Api2_M
 		$requestParams =  new SearchSpring_Manager_Entity_RequestParams(
 			(int)$this->getRequest()->getParam('count', self::COUNT_DEFAULT),
 			(int)$this->getRequest()->getParam('start', self::OFFSET_DEFAULT),
-			$this->getRequest()->getParam('store', self::STORE_DEFAULT)
+			$this->_getStore()->getCode()
 		);
 
 		$params = array('filename' => $uniqueFilename);

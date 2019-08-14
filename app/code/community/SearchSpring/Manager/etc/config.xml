@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<SearchSpring_Manager>
-			<version>1.9.0</version>
+			<version>2.0.0</version>
 		</SearchSpring_Manager>
 	</modules>
 	<global>
@@ -29,6 +29,7 @@
 		</helpers>
 		<events>
 			<!-- use catalog_product_save_commit_after otherwise we can get stale product data if our request runs before commit -->
+			<!-- TODO ?? should can we indicate singleton, or single instances of each observer should be re-used ?? -->
 			<catalog_product_save_commit_after>
 				<observers>
 					<searchspring_manager_after_save_push_product>
@@ -79,10 +80,10 @@
 			</catalog_category_change_products>
 			<catalog_controller_category_delete>
 				<observers>
-					<searchspring_manager_after_delete_update_product_category>
+					<searchspring_manager_before_delete_update_product_category>
 						<class>searchspring_manager/observer_categorySaveObserver</class>
-						<method>afterDeleteUpdateProductCategory</method>
-					</searchspring_manager_after_delete_update_product_category>
+						<method>beforeDeleteUpdateProductCategory</method>
+					</searchspring_manager_before_delete_update_product_category>
 				</observers>
 			</catalog_controller_category_delete>
 		</events>
@@ -169,7 +170,6 @@
 		<ssmanager>
 			<ssmanager_general>
 				<live_indexing>0</live_indexing>
-				<feed_path>media/searchspring/feed/</feed_path>
 			</ssmanager_general>
 			<ssmanager_catalog>
 				<enable_categories>0</enable_categories>
@@ -177,6 +177,12 @@
 			<ssmanager_images>
 				<generate_cache_images>1</generate_cache_images>
 			</ssmanager_images>
+			<ssmanager_feed>
+				<feed_path>media/searchspring/feed/</feed_path>
+			</ssmanager_feed>
+			<ssmanager_sales_rank>
+				<timespan>6,month</timespan>
+			</ssmanager_sales_rank>
 			<ssmanager_api>
 				<authentication_method>simple</authentication_method>
 			</ssmanager_api>

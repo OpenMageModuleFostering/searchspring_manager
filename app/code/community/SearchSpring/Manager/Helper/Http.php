@@ -39,20 +39,19 @@ class SearchSpring_Manager_Helper_Http extends Mage_Core_Helper_Http
 	 *
 	 * @return bool
 	 */
-	public function isSimpleAuthValid() {
+	public function isSimpleAuthValid(SearchSpring_Manager_Entity_Credentials $creds) {
 
+		// Make sure auth was provided for this request at all
 		if (!$this->isSimpleAuthProvided()) {
 			return false;
 		}
 
+		// Validate against credentials
 		list($username, $password) = $this->getBasicAuthCredentials();
-
-		// Get Valid Credentials from configuration
-		$helper = Mage::helper('searchspring_manager');
-		$feedId = $helper->getApiFeedId();
-		$secretKey = $helper->getApiSecretKey();
-
-		return ($feedId == $username && $secretKey == $password);
+		return (
+			$username == $creds->getUsername() &&
+			$password == $creds->getPassword()
+		);
 	}
 
 	/**

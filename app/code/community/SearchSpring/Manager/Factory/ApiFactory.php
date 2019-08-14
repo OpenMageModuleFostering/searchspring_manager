@@ -8,40 +8,40 @@
 /**
  * Class SearchSpring_Manager_Factory_ApiFactory
  *
- * Create a SearchSpring api request object
+ * Create a SearchSpring api request objects
  *
  * @author Nate Brunette <nate@b7interactive.com>
+ * @author Jake Shelby <jake@b7interactive.com>
  */
 class SearchSpring_Manager_Factory_ApiFactory
 {
+
 	/**
-	 * Make the object
+	 * Make indexing adapter for a specific store
 	 *
-	 * Pulls in config values from the Magento configuration. Uses the Varien curl adapter.
+	 * Pulls in config values from the Magento configuration, based
+	 * on specified store. Uses the Zend Http Client adapter.
 	 *
-	 * @param $type string The type of API to build (index or search)
+	 * @param $store mixed Mage store id|code|object 
 	 *
 	 * @return SearchSpring_Manager_Service_SearchSpring_IndexingApiAdapter
 	 *
-	 * @throws UnexpectedValueException
+	 * @throws Exception
 	 */
-	public function make($type)
+	public function makeIndexingAdapter($store)
 	{
+		$hlp = Mage::helper('searchspring_manager');
 
-		$baseUrl = Mage::helper('searchspring_manager')->getApiBaseUrl();
-		$siteId = Mage::helper('searchspring_manager')->getApiSiteId();
-		$secretKey = Mage::helper('searchspring_manager')->getApiSecretKey();
+		$feedId = $hlp->getApiFeedId($store);
+		$creds = $hlp->getApiCredentials($store);
 
-		if (empty($baseUrl)) {
-			throw new UnexpectedValueException('SearchSpring: Base URL must be set');
+		if (!$feedId) {
+			$code = Mage::app()->getStore($store)->getCode();
+			throw new Exception("Cannot create API adapter for store: $code; feed id is not configured.");
 		}
-
-		if (empty($siteId)) {
-			throw new UnexpectedValueException('SearchSpring: Site ID must be set');
-		}
-
-		if (empty($secretKey)) {
-			throw new UnexpectedValueException('SearchSpring: Secret key must be set');
+		if (!$creds->isPopulated()) {
+			$code = Mage::app()->getStore($store)->getCode();
+			throw new Exception("Cannot create API adapter for store: $code; incomplete API credentials.");
 		}
 
 		$apiErrorHandler = new SearchSpring_Manager_Handler_ApiErrorHandler();
@@ -54,22 +54,48 @@ class SearchSpring_Manager_Factory_ApiFactory
 			'keepalive' => true
 		));
 
-		if($type == 'index') {
-			$client->setAuth($siteId, $secretKey);
+		$client->setAuth($creds->getUsername(), $creds->getPassword());
 
-			$api = new SearchSpring_Manager_Service_SearchSpring_IndexingApiAdapter(
-				$apiErrorHandler,
-				$client,
-				$baseUrl
-			);
-		} else {
-			$api = new SearchSpring_Manager_Service_SearchSpring_SearchApiAdapter(
-				$apiErrorHandler,
-				$client,
-				$baseUrl
-			);
-		}
+		$api = new SearchSpring_Manager_Service_SearchSpring_IndexingApiAdapter(
+			$apiErrorHandler,
+			$client,
+			$this->getApiBaseUrl(),
+			$feedId
+		);
 
 		return $api;
 	}
+
+	/**
+	 * Make search adapter
+	 *
+	 * Creates an instance of a search adapter. Uses the Zend Http Client adapter
+	 *
+	 * @return SearchSpring_Manager_Service_SearchSpring_SearchApiAdapter
+	 */
+	public function makeSearchAdapter()
+	{
+		$apiErrorHandler = new SearchSpring_Manager_Handler_ApiErrorHandler();
+
+		$client = new Zend_Http_Client();
+		$client->setConfig(array(
+			'maxredirects' => 0,
+			'timeout' => 15,
+			'keepalive' => true
+		));
+
+		$api = new SearchSpring_Manager_Service_SearchSpring_SearchApiAdapter(
+			$apiErrorHandler,
+			$client,
+			$this->getApiBaseUrl()
+		);
+
+		return $api;
+	}
+
+	public function getApiBaseUrl()
+	{
+		return Mage::helper('searchspring_manager')->getApiBaseUrl();
+	}
+
 }

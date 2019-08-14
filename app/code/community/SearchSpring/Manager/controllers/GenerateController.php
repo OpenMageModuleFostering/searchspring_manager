@@ -23,11 +23,6 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 	const COUNT_DEFAULT = 100;
 
 	/**
-	 * Default store if no parameter is set
-	 */
-	const STORE_DEFAULT = 'default';
-
-	/**
 	 * Default action for updating based on product/category id
 	 *
 	 * Parameters:
@@ -52,7 +47,7 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 		$requestParams =  new SearchSpring_Manager_Entity_RequestParams(
 			(int)$request->getParam('size', null),
 			(int)$request->getParam('start', null),
-			$request->getParam('store', self::STORE_DEFAULT)
+			Mage::app()->getStore()->getCode()
 		);
 
 		$params = array('ids' => $ids);
@@ -75,7 +70,6 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 	 *	 filename (required): A unique filename when creating temporary files.
 	 *	 start (optional): The starting point for fetching products. Defaults to 0.
 	 *	 count (optional): The number of products to fetch. Defaults to 100.
-	 *	 store (optional): The store name as a string. Defaults to 'default'
 	 */
 	public function feedAction()
 	{
@@ -88,7 +82,7 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 		$requestParams =  new SearchSpring_Manager_Entity_RequestParams(
 			(int)$this->getRequest()->getParam('count', self::COUNT_DEFAULT),
 			(int)$this->getRequest()->getParam('start', self::OFFSET_DEFAULT),
-			$this->getRequest()->getParam('store', self::STORE_DEFAULT)
+			Mage::app()->getStore()->getCode()
 		);
 
 		$params = array('filename' => $uniqueFilename);
@@ -137,16 +131,16 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 	}
 
 	protected function isEnabled() {
-		$helper = Mage::helper('searchspring_manager');
+		$hlp = Mage::helper('searchspring_manager');
 		// For now, this controller only handles the 'simple' auth method
-		$authenticationMethod = $helper->getAuthenticationMethod();
+		$authenticationMethod = $hlp->getAuthenticationMethod( Mage::app()->getStore() );
 		return $authenticationMethod == 'simple';
 	}
 
 	protected function _authenticate() {
 
-		$helper = Mage::helper('searchspring_manager/http');
-		list($username, $password) = $helper->isSimpleAuthProvided(true); // true, itemized
+		$hlp = Mage::helper('searchspring_manager/http');
+		list($username, $password) = $hlp->isSimpleAuthProvided(true); // true, itemized
 
 		// Make sure auth username was provided
 		if(empty($username)) {
@@ -167,7 +161,7 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 		}
 
 		// Make sure auth credentials are valid
-		if(!$helper->isSimpleAuthValid()) {
+		if(!$hlp->isSimpleAuthValid($this->_getMyCredentials())) {
 			$this->respondWithError(
 				'Authentication Failed: Invalid credentials',
 				SearchSpring_ErrorCodes::AUTH_CREDENTIALS_INVALID,
@@ -175,6 +169,10 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 			);
 		}
 
+	}
+
+	protected function _getMyCredentials() {
+		return Mage::helper('searchspring_manager')->getMageApiCredentials( Mage::app()->getStore() );
 	}
 
 	/**

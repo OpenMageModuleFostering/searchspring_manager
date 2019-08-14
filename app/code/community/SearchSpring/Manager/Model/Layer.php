@@ -28,7 +28,7 @@ class SearchSpring_Manager_Model_Layer extends Mage_Catalog_Model_Layer
 			$collection = $this->_productCollections[$this->getCurrentCategory()->getId()];
 		} else {
 			$apiFactory = new SearchSpring_Manager_Factory_ApiFactory();
-			$api = $apiFactory->make('search');
+			$api = $apiFactory->makeSearchAdapter();
 
 			$searchRequestBodyFactory = new SearchSpring_Manager_Factory_SearchRequestBodyFactory();
 			$searchRequestBody = $searchRequestBodyFactory->make();

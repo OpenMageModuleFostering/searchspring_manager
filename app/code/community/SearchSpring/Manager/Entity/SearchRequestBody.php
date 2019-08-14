@@ -31,13 +31,9 @@ class SearchSpring_Manager_Entity_SearchRequestBody extends SearchSpring_Manager
     /**
      * Constructor
      */
-    public function __construct()
+    public function __construct($siteId)
     {
-		$this->_siteId = Mage::helper('searchspring_manager')->getApiSiteId();
-
-		if (null === $this->_siteId) {
-			throw new UnexpectedValueException('SearchSpring: Site ID must be set');
-		}
+		$this->_siteId = $siteId;
     }
 
 	public function addFilter($field, $value, $append = false) {

@@ -19,11 +19,11 @@ class SearchSpring_Manager_Model_Api2_Auth_Adapter extends Mage_Api2_Model_Auth_
 		$oauthServer = Mage::getModel('searchspring_manager/oauth_server', $request);
 		$hlp = Mage::helper('searchspring_manager');
 		$oahlp = Mage::helper('searchspring_manager/oauth');
+		$storeCode = $request->getParam('store');
 
 		try {
-
 			// Make sure this Authentication Method is enabled
-			if ($hlp->getAuthenticationMethod() != 'oauth') {
+			if ($hlp->getAuthenticationMethod($storeCode) != 'oauth') {
 				throw new Mage_Api2_Exception('Not authorized', Mage_Api2_Model_Server::HTTP_UNAUTHORIZED);
 			}
 

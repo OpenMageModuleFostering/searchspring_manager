@@ -17,15 +17,32 @@ class SearchSpring_Manager_Helper_Product extends Mage_Core_Helper_Abstract
 
 	public function getAttributeText($product, $attributeCode) {
 
-		$attribute = $product->getResource()->getAttribute($attributeCode);
-
-		// If the attribute type uses a set number of options, we need to resolve the id
-		if ($attribute->getFrontendInput() === 'select' ||
-			$attribute->getFrontendInput() === 'multiselect'
-		) {
-			return $product->getAttributeText($attributeCode);
+		if ($attributeCode instanceof Mage_Eav_Model_Entity_Attribute) {
+			$attribute = $attributeCode;
+			$attributeCode = $attribute->getAttributeCode();
 		} else {
-			return $product->getData($attributeCode);
+			$attribute = $product->getResource()->getAttribute($attributeCode);
+		}
+
+		if (!is_object($attribute)) {
+			throw new Exception("Unknown attribute: $attributeCode");
+		}
+
+		if ($attribute->getFrontendInput() === 'boolean' ||
+			$attribute->getFrontendInput() === 'select'
+		) {
+
+			// Magento's Attribute Frontend getValue() function
+			// returns 'No' for optional attributes with nothing
+			// set, specifically for these types...
+			// So we'll just try and resolve from the attribute
+			// options map, or empty if the value isn't set.
+			return $product->getAttributeText($attributeCode);
+
+		} else {
+
+			return $attribute->getFrontend()->getValue($product);
+
 		}
 
 	}

@@ -29,13 +29,39 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
 	 */
 	protected $_categoryCache = array();
 
+	protected $_rootCategoryId;
+	protected $_store;
+
+	/**
+	 * After collection has been loaded, but before operations are performed.
+	 *
+     * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
+     * @return $this
+	 */
+	public function prepare($productCollection)
+	{
+		// Do a one time fetch of all the
+		// category ids, so we don't hit
+		// the database on each product
+		$productCollection->addCategoryIds();
+
+		// Conform our scope to the store of the collection
+		$this->_store = Mage::app()->getStore( $productCollection->getStoreId() );
+
+		// If the store wasn't admin, get the root category id
+		if (!$this->_store->isAdmin()) {
+			$this->_rootCategoryId = $this->_store->getRootCategoryId();
+		}
+
+		return $this;
+	}
+
     /**
      * Sets category data to feed
      *     - category_hierarchy
      *     - category_name
      *
      * @param Mage_Catalog_Model_Product $product
-     *
      * @return $this
      */
     public function perform(Mage_Catalog_Model_Product $product)
@@ -43,7 +69,6 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
         $categoryHierarchies = array();
         $categoryNames = array();
 		$categoryIds = array();
-
 
         /** @var Mage_Catalog_Model_Category $category */
         foreach($product->getCategoryIds() as $categoryId) {
@@ -53,6 +78,11 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
             if (!$category->getData('is_active')) {
                 continue;
             }
+
+            // Skip categories from other stores
+			if (!$this->_isInStore($category)) {
+                continue;
+			}
 
             // Skip this store's root category
             if ($this->_isRoot($category)) {
@@ -129,6 +159,14 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
 			$this->_categoryCache[$categoryId] = Mage::getModel('catalog/category')->load($categoryId);
 		}
 		return $this->_categoryCache[$categoryId];
+	}
+
+	protected function _isInStore($category) {
+		if (empty($this->_rootCategoryId)) {
+			// We're not in a specific scope
+			return true;
+		}
+		return in_array($this->_rootCategoryId, $category->getPathIds());
 	}
 
 	protected function _isRoot($category) {

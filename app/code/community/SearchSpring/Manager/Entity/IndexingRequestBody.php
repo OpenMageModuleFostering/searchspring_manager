@@ -8,9 +8,12 @@
 /**
  * Class SearchSpring_Manager_Entity_IndexingRequestBody
  *
- * The class models a SearchSpring API request body which needs a feed id and an array of records.
+ * The class models a SearchSpring API request body which needs
+ * an array of records. Each instance is feed agnostic, and
+ * therefore requires a feed id to serialize.
  *
  * @author Nate Brunette <nate@b7interactive.com>
+ * @author Jake Shelby <jake@b7interactive.com>
  */
 class SearchSpring_Manager_Entity_IndexingRequestBody extends SearchSpring_Manager_Entity_RequestBody
 {
@@ -64,28 +67,30 @@ class SearchSpring_Manager_Entity_IndexingRequestBody extends SearchSpring_Manag
         $this->type = $type;
         $this->ids = $ids;
         $this->shouldDelete = $shouldDelete;
-
-        $this->feedId = Mage::helper('searchspring_manager')->getApiFeedId();
-        if (null === $this->feedId) {
-            throw new UnexpectedValueException('SearchSpring: Feed ID must be set');
-        }
     }
+
+	/**
+	 * Get the IDs for the request
+	 *
+	 * @return array
+	 */
+	public function getIds()
+	{
+		return $this->ids;
+	}
 
 	/**
 	 * Returns a value that's allowed to be given to json_encode
 	 *
 	 * @return array
 	 */
-	public function jsonSerialize()
+	public function jsonSerialize($feedId)
 	{
-        $url = Mage::helper('searchspring_manager')->getMageAPIUrlProduct();
-
 		$body = array(
 			'type' => $this->type,
 			'ids' => $this->ids,
 			'delete' => $this->shouldDelete,
-			'feedId' => $this->feedId,
-			'generateUrl' => $url
+			'feedId' => $feedId,
 		);
 
 		return $body;

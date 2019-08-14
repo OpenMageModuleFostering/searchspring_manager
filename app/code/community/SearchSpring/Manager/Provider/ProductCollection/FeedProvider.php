@@ -57,13 +57,18 @@ class SearchSpring_Manager_Provider_ProductCollection_FeedProvider
             return $this->collection;
         }
 
+		$store = Mage::app()->getStore($this->requestParams->getStore());
+
         /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
         $collection = Mage::getModel('catalog/product')->getCollection();
-        $collection->addStoreFilter(Mage::app()->getStore($this->requestParams->getStore())->getId());
         $collection->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
         $collection->addAttributeToFilter('type_id', array('in' => SearchSpring_Manager_Validator_ProductValidator::$allowableTypes));
-        $collection->addAttributeToFilter('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
 
+		// Set store, and filter by it
+        $collection->setStoreId($store->getId());
+        $collection->addStoreFilter();
+
+		Mage::getSingleton('catalog/product_visibility')->addVisibleInSiteFilterToCollection($collection);
 
         if (!Mage::helper('searchspring_manager')->isOutOfStockIndexingEnabled()) {
             Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);

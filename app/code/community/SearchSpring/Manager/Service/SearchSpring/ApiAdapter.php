@@ -47,7 +47,7 @@ class SearchSpring_Manager_Service_SearchSpring_ApiAdapter
 	 * Constructor
 	 *
 	 * @param SearchSpring_Manager_Handler_ApiErrorHandler $errorHandler
-	 * @param Varien_Http_Adapter_Curl $curl
+	 * @param Zend_Http_Client $client
 	 * @param string $baseUrl
 	 */
 	public function __construct(

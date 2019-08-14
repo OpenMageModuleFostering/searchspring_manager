@@ -45,7 +45,7 @@ class SearchSpring_Manager_Transformer_ProductCollectionToRecordCollectionTransf
      *
      * @return SearchSpring_Manager_Entity_RecordsCollection
      */
-    public function transform(Mage_Catalog_Model_Resource_Product_Collection $productCollection)
+    public function transform($productCollection)
     {
 		Varien_Profiler::start(__METHOD__);
 
@@ -123,7 +123,7 @@ class SearchSpring_Manager_Transformer_ProductCollectionToRecordCollectionTransf
 	 *
 	 * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
 	 */
-	protected function prepareCollection(Mage_Catalog_Model_Resource_Product_Collection $productCollection) {
+	protected function prepareCollection($productCollection) {
 
 		foreach ($this->operationsCollection as $operation) {
 			$operation->prepareCollection($productCollection);
@@ -139,7 +139,7 @@ class SearchSpring_Manager_Transformer_ProductCollectionToRecordCollectionTransf
 	 *
 	 * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
 	 */
-	protected function prepareOperations(Mage_Catalog_Model_Resource_Product_Collection $productCollection) {
+	protected function prepareOperations($productCollection) {
 
 		foreach ($this->operationsCollection as $operation) {
 			Varien_Profiler::start(__METHOD__.": operation->prepare() " . get_class($operation));
@@ -149,7 +149,7 @@ class SearchSpring_Manager_Transformer_ProductCollectionToRecordCollectionTransf
 
 	}
 
-	protected function loadCollection(Mage_Catalog_Model_Resource_Product_Collection $productCollection) {
+	protected function loadCollection($productCollection) {
 
 		Varien_Profiler::start(__METHOD__.": productCollection->load()");
 		$productCollection->load();

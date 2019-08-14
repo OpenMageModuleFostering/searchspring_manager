@@ -96,6 +96,12 @@ class SearchSpring_Manager_Writer_Product_Params_FileWriterParams
 		$this->validateBaseDir();
     }
 
+	static public function getBaseFilename($store)
+	{
+		$storeCode = Mage::app()->getStore($store)->getCode();
+		return sprintf(self::FILENAME_FINAL_PATTERN, $storeCode);
+	}
+
 	/**
 	 * Validate base directory
 	 *
@@ -188,7 +194,7 @@ class SearchSpring_Manager_Writer_Product_Params_FileWriterParams
 	public function getFilename()
 	{
 		if (null === $this->filename) {
-			$this->filename = $this->baseDir . DS . sprintf(self::FILENAME_FINAL_PATTERN, $this->requestParams->getStore());
+			$this->filename = $this->baseDir . DS . $this->getBaseFilename($this->requestParams->getStore());
 		}
 
 		return $this->filename;

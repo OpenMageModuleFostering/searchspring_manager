@@ -1,0 +1,59 @@
+<div class="section-config active">
+	<div class="entry-edit-head ">
+		<a>SearchSpring Connection</a>
+	</div>
+	<fieldset class="config collapseable" id="ssmanager_ssmanager_setup">
+		<legend>SearchSpring Connection</legend>
+		<table cellspacing="0" class="form-list">
+			<colgroup class="label"></colgroup>
+			<colgroup class="value"></colgroup>
+			<colgroup class="scope-label"></colgroup>
+			<colgroup class=""></colgroup>
+			<tbody>
+			<tr id="row_ssmanager_ssmanager_setup_connection">
+				<td class="label">
+					<label for="ssmanager_ssmanager_setup_connection">Connection</label>
+				</td>
+				<td class="value">
+					<?php if ($this->isInDefaultScope()): ?>
+						<select id="ss-store-select">
+							<option class="ss-choose-select" value="na">Choose a store to connect and/or manage</option>
+							<?php foreach($this->getWebsites() as $website): ?>
+								<optgroup label="<?php echo $this->getWebsiteLabel($website) ?>" />
+								<?php foreach($this->getGroups($website) as $group): ?>
+									<optgroup label="&nbsp;&nbsp;&nbsp;<?php echo $this->getGroupLabel($group) ?>" />
+									<?php foreach($this->getStores($group) as $store): ?>
+										<option value="<?php echo $this->getStoreUrl($store) ?>">
+											&nbsp;&nbsp;&nbsp;<?php echo $this->getStoreLabel($store) ?> (<?php echo $this->isSetup($store) ? $this->__('Connected') : $this->__('Not Connected') ?>)
+										</option>
+									<?php endforeach; ?>
+								<?php endforeach; ?>
+							<?php endforeach; ?>
+						</select>
+					<?php elseif ($this->isInWebsiteScope()): ?>
+						<select id="ss-store-select">
+							<option class="ss-choose-select" value="na">Choose a store to connect and/or manage</option>
+							<?php foreach($this->getGroups() as $group): ?>
+								<optgroup label="&nbsp;&nbsp;&nbsp;<?php echo $this->getGroupLabel($group) ?>" />
+								<?php foreach($this->getStores($group) as $store): ?>
+									<option value="<?php echo $this->getStoreUrl($store) ?>">
+										&nbsp;&nbsp;&nbsp;<?php echo $this->getStoreLabel($store) ?> (<?php echo $this->isSetup($store) ? $this->__('Connected') : $this->__('Not Connected') ?>)
+									</option>
+								<?php endforeach; ?>
+							<?php endforeach; ?>
+						</select>
+					<?php endif; ?>
+				</td>
+				<td class="scope-label"></td>
+				<td class=""></td>
+			</tr>
+			</tbody>
+		</table>
+	</fieldset>
+</div>
+
+<style type="text/css">
+<?php // TODO -- Can we move this to a sheet? ?>
+	.entry-edit-head a { text-decoration: none; }
+</style>
+

@@ -1,5 +1,4 @@
 jQuery.noConflict();
-
 (function($){
 
     $(function() {
@@ -22,21 +21,25 @@ jQuery.noConflict();
         var cancelButton = $('#ss-cancel-button');
         var confirmButton = $('#ss-confirm-button');
 
-        var apiUrlEl = $('#ssmanager_ssmanager_api_base_url');
         var siteIdEl = $('#ssmanager_ssmanager_api_site_id');
         var feedIdEl = $('#ssmanager_ssmanager_api_feed_id');
         var secretKeyEl = $('#ssmanager_ssmanager_api_secret_key');
 
         var authEl = $('#ssmanager_ssmanager_api_authentication_method');
 
+        var storeSelect = $('#ss-store-select');
+
         // Hide Connection Settings Block
-        apiUrlEl.parents('.section-config').hide();
+		var apiHeadEl = $('#ssmanager_ssmanager_api-head');
+		apiHeadEl.parents('.section-config').hide();
 
         reconnectButton.bind('click', reconnect);
 
         loginButton.bind('click', loginSearchSpring);
         usernameField.bind('keypress', loginEnter);
         passwordField.bind('keypress', loginEnter);
+
+        storeSelect.bind('change', selectStore);
 
         function reconnect() {
             $('.ss-login-connected').hide();
@@ -169,8 +172,6 @@ jQuery.noConflict();
 
         function connectSettings() {
             confirmButton.addClass('loading');
-            apiUrlEl.val('https://api-beta.searchspring.net');
-            //apiUrlEl.val('https://23.23.23.2');
             siteIdEl.val(websites[websiteSelect.val()].siteId);
             secretKeyEl.val(websites[websiteSelect.val()].secretKey);
             feedIdEl.val(feedSelect.val());
@@ -180,6 +181,13 @@ jQuery.noConflict();
             $('#searchspring_new_connection_fl').val('1');
 
             configForm.submit();
+        }
+
+        function selectStore() {
+            var val = $(this).val();
+            if(val != 'na') {
+                location.href = val;
+            }
         }
 
         function getObjectLength(obj) {

@@ -8,12 +8,21 @@
 /**
  * Class SearchSpring_Manager_Model_Observer_CategorySaveObserver
  *
- * On a category change, trigger one of these methods
+ * Listens for category change events and forwards to the Live Indexing Service
  *
  * @author Nate Brunette <nate@b7interactive.com>
+ * @author Jake Shelby <jake@b7interactive.com>
  */
-class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpring_Manager_Model_Observer_LiveIndexer
+class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpring_Manager_Model_Observer
 {
+
+	/**
+	 * Live Indexer Service
+	 *
+	 * @var SearchSpring_Manager_Service_LiveIndexer $liveIndexer
+	 */
+	private $liveIndexer;
+
 	/**
 	 * Performs operations on a Varien_Object
 	 *
@@ -22,18 +31,15 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 	private $varienObjectData;
 
 	/**
-	 * Create a request body
-	 *
-	 * @var SearchSpring_Manager_Factory_IndexingRequestBodyFactory $requestBodyFactory
-	 */
-	private $requestBodyFactory;
-
-	/**
 	 * Constructor
+	 *
+	 * We need to do some setup in here because there's no way to inject dependencies
 	 */
 	public function __construct()
 	{
-		$this->requestBodyFactory = new SearchSpring_Manager_Factory_IndexingRequestBodyFactory();
+		$factory = new SearchSpring_Manager_Factory_LiveIndexerFactory;
+		$this->liveIndexer = $factory->make();
+
 		$this->varienObjectData = new SearchSpring_Manager_VarienObject_Data();
 	}
 
@@ -44,73 +50,34 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 	 *
 	 * @todo implement status change
 	 *
-	 * @param Varien_Event_Observer $productEvent
+	 * @event catalog_category_save_commit_after
 	 *
-	 * @return bool
+	 * @param Varien_Event_Observer $productEvent
+	 * @return void
 	 */
 	public function afterSaveUpdateProductCategory(Varien_Event_Observer $productEvent)
 	{
-		if (!$this->isEnabled()) {
-			return true;
-		}
+		try {
 
-		/** @var Mage_Catalog_Model_Category $category */
-		$category = $productEvent->getData('category');
+			$category = $productEvent->getCategory();
 
-		// if this is a new category return because we already sent the ids
-		if (true === $this->varienObjectData->isNew($category)) {
-			return true;
-		}
-
-		$updates = $this->varienObjectData->findUpdatedData($category);
-
-		// if category name is not changed, this will not affect the product categories
-		if (!isset($updates['name']) && !isset($updates['is_active'])) {
-			return true;
-		}
-
-		$requestBody = $this->requestBodyFactory->make(
-			SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_CATEGORY,
-			$category->getAllChildren(true)
-		);
-		$this->apiPushProductIds($requestBody);
-
-		return true;
-	}
-
-	/**
-	 * After category products have changed
-	 *
-	 * This is triggered when products are checked or unchecked for a category.  Only affects products of category.
-	 *
-	 * @param Varien_Event_Observer $productEvent
-	 *
-	 * @return bool
-	 */
-	public function afterProductChangeUpdateProductCategory(Varien_Event_Observer $productEvent)
-	{
-		if (!$this->isEnabled()) {
-			return true;
-		}
-
-		$validator = new SearchSpring_Manager_Validator_ProductValidator();
-
-		$productIds = $productEvent->getData('product_ids');
-		foreach($productIds as $k => $productId) {
-			$product = Mage::getModel('catalog/product')->load($productId);
-			if(!$validator->isValid($product)) {
-				unset($productIds[$k]);
+			// if this is a new category return because we already sent the ids
+			if (true === $this->varienObjectData->isNew($category)) {
+				return true;
 			}
+
+			$updates = $this->varienObjectData->findUpdatedData($category);
+
+			// If category name is not changed, this will not affect the product categories
+			if (!isset($updates['name']) && !isset($updates['is_active'])) {
+				return true;
+			}
+
+			$this->liveIndexer->categorySaved($category);
+
+		} catch (Exception $e) {
+			$this->handleException($e);
 		}
-
-		$requestBody = $this->requestBodyFactory->make(
-			SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_PRODUCT,
-			$productIds
-		);
-
-		$this->apiPushProductIds($requestBody);
-
-		return true;
 	}
 
 	/**
@@ -119,75 +86,86 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 	 * Updates products and sub-products. Only update if path is changed. This should be double checked, but path
 	 * should not be changed if the category is just reordered.
 	 *
-	 * @param Varien_Event_Observer $productEvent
+	 * @event category_move
 	 *
-	 * @return bool
+	 * @param Varien_Event_Observer $productEvent
+	 * @return void
 	 */
 	public function afterMoveUpdateProductCategory(Varien_Event_Observer $productEvent)
 	{
-		if (!$this->isEnabled()) {
-			return true;
+		try {
+
+			$category = $productEvent->getCategory();
+			$updates = $this->varienObjectData->findUpdatedData($category);
+
+			if (!isset($updates['path'])) {
+				return;
+			}
+
+			$this->liveIndexer->categorySaved($category);
+
+		} catch (Exception $e) {
+			$this->handleException($e);
 		}
-
-		$category = $productEvent->getData('category');
-		$updates = $this->varienObjectData->findUpdatedData($category);
-
-		if (!isset($updates['path'])) {
-			return true;
-		}
-
-		$requestBody = $this->requestBodyFactory->make(
-			SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_CATEGORY,
-			$category->getAllChildren(true)
-		);
-		$this->apiPushProductIds($requestBody);
-
-		return true;
 	}
 
 	/**
-	 * After a category is deleted
+	 * Right before a category is deleted. Remove the category from products and sub-products.
 	 *
-	 * Remove the category from products and sub-products.
+	 * @event catalog_controller_category_delete
 	 *
 	 * @param Varien_Event_Observer $productEvent
-	 * @return bool
+	 * @return void
 	 */
-	public function afterDeleteUpdateProductCategory(Varien_Event_Observer $productEvent)
+	public function beforeDeleteUpdateProductCategory(Varien_Event_Observer $productEvent)
 	{
-		if (!$this->isEnabled()) {
-			return true;
+		try {
+
+			$category = $productEvent->getCategory();
+
+			// TODO -- ?? should we add the token dance here as well ?? might have a problem with the race condition here
+			$this->liveIndexer->categoryDeleted($category);
+
+		} catch (Exception $e) {
+			$this->handleException($e);
 		}
-
-		/** @var Mage_Catalog_Model_Category $category */
-		$category = $productEvent->getData('category');
-		$requestBody = $this->requestBodyFactory->make(
-			SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_PRODUCT,
-			$this->getCategoryProductIds($category)
-		);
-		$this->apiPushProductIds($requestBody);
-
-		return true;
 	}
 
 	/**
-	 * Get product ids for category and subcategories
+	 * After category products have changed
 	 *
-	 * @param Mage_Catalog_Model_Category $category
+	 * This is triggered when products are checked or unchecked for a category.  Only affects products of category.
 	 *
-	 * @return array
+	 * @event catalog_category_change_products
+	 *
+	 * @param Varien_Event_Observer $productEvent
+	 * @return void
 	 */
-	private function getCategoryProductIds(Mage_Catalog_Model_Category $category)
+	public function afterProductChangeUpdateProductCategory(Varien_Event_Observer $productEvent)
 	{
-		/** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
-		$collection = mage::getModel('catalog/product')->getCollection()
-			->addAttributeToSelect('*')
-			->joinField('category_id', 'catalog/category_product', 'category_id', 'product_id=entity_id', null, 'left')
-			->addAttributeToFilter('category_id', array('in' => $category->getAllChildren(true)));
-		$collection->getSelect()->group('e.entity_id');
-		$productIds = $collection->load()->getAllIds();
+		try {
 
-		return $productIds;
+			$category = $productEvent->getCategory();
+			$productIds = $productEvent->getProductIds();
+
+			$this->liveIndexer->categoryProductsUpdated($category, $productIds);
+
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
+	}
+
+	protected function handleException(Exception $e)
+	{
+		// TODO - is there a mage exception we can catch to send a better message to admin??
+
+		// Get some kind of context info
+
+		// log what happened
+		Mage::logException($e);
+
+		// Get the best message for the admin user, and notify
+		$this->notifyAdminUser("SearchSpring: There was a live indexing issue, please contact SearchSpring support for assistance.");
 	}
 
 }

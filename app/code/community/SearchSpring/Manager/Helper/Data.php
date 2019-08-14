@@ -8,201 +8,103 @@
 /**
  * Class SearchSpring_Manager_Helper_Data
  *
- * You should need to put anything in this class, but Magento needs to to function.
- *
  * @author Nate Brunette <nate@b7interactive.com>
+ * @author Jake Shelby <jake@b7interactive.com>
  */
 class SearchSpring_Manager_Helper_Data extends Mage_Core_Helper_Abstract
 {
 
-	const XML_PATH_GLOBAL_LIVE_INDEXING_ENABLE_FL	= 'ssmanager/ssmanager_general/live_indexing';
-	const XML_PATH_INDEX_ZERO_PRICE					= 'ssmanager/ssmanager_general/index_zero_price';
-	const XML_PATH_INDEX_OUT_OF_STOCK				= 'ssmanager/ssmanager_general/index_out_of_stock';
-	const XML_PATH_FEED_PATH						= 'ssmanager/ssmanager_general/feed_path';
+	/**
+	 * SearchSpring Config Model
+	 *
+	 * @var SearchSpring_Manager_Model_Config
+	 */
+	protected $config;
 
-	const XML_PATH_GLOBAL_CATEGORY_ENABLE_FL		= 'ssmanager/ssmanager_catalog/enable_categories';
-
-	const XML_PATH_API_BASE_URL						= 'ssmanager/ssmanager_api/base_url';
-	const ENV_VAR_API_BASE_URL                      = 'SEARCHSPRING_API_HOST';
-
-	const XML_PATH_API_FEED_ID						= 'ssmanager/ssmanager_api/feed_id';
-	const XML_PATH_API_SITE_ID						= 'ssmanager/ssmanager_api/site_id';
-	const XML_PATH_API_SECRET_KEY					= 'ssmanager/ssmanager_api/secret_key';
-
-	const XML_PATH_API_AUTHENTICATION_METHOD		= 'ssmanager/ssmanager_api/authentication_method';
-	const AUTH_METHOD_SIMPLE						= 'simple';
-	const AUTH_METHOD_OAUTH							= 'oauth';
-
-	const XML_PATH_GENERATE_CACHE_IMAGES			= 'ssmanager/ssmanager_images/generate_cache_images';
-	const XML_PATH_IMAGE_WIDTH						= 'ssmanager/ssmanager_images/image_width';
-	const XML_PATH_IMAGE_HEIGHT						= 'ssmanager/ssmanager_images/image_height';
-
-	const XML_PATH_GENERATE_SWATCH_IMAGES			= 'ssmanager/ssmanager_images/generate_swatch_images';
-	const XML_PATH_SWATCH_WIDTH						= 'ssmanager/ssmanager_images/swatch_width';
-	const XML_PATH_SWATCH_HEIGHT					= 'ssmanager/ssmanager_images/swatch_height';
-
-	const XML_PATH_UUID								= 'ssmanager/ssmanager_track/uuid';
-
-	const MANAGER_API_PATH_PRODUCT_SIMPLE			= 'searchspring/generate/index';
-	const MANAGER_API_PATH_GENERATE_SIMPLE			= 'searchspring/generate/feed';
-	const MANAGER_API_PATH_PRODUCT_OAUTH			= 'api/rest/searchspring/index';
-	const MANAGER_API_PATH_GENERATE_OAUTH			= 'api/rest/searchspring/feed';
-
-	public function getVersion() {
-		return Mage::getConfig()->getNode('modules/SearchSpring_Manager/version');
+	public function __construct() {
+		// Create an instance of Search Spring config provider
+		$this->config = new SearchSpring_Manager_Model_Config( Mage::app() );
 	}
 
-	public function isLiveIndexingEnabled()
-	{
-		return Mage::getStoreConfigFlag(self::XML_PATH_GLOBAL_LIVE_INDEXING_ENABLE_FL);
+	public function getConfig() {
+		return $this->config;
 	}
 
-	public function isCategorySearchEnabled()
-	{
-		return Mage::getStoreConfigFlag(self::XML_PATH_GLOBAL_CATEGORY_ENABLE_FL);
-	}
+	/**
+	 * Functions to do ... stuff (lack of better word)
+	 */
 
-	public function isZeroPriceIndexingEnabled()
-	{
-		return Mage::getStoreConfigFlag(self::XML_PATH_INDEX_ZERO_PRICE);
-	}
+	public function registerMagentoAPIWithSearchSpring($store) {
 
-	public function isOutOfStockIndexingEnabled()
-	{
-		return Mage::getStoreConfigFlag(self::XML_PATH_INDEX_OUT_OF_STOCK);
-	}
+		// TODO - Restrict one store being registered with the same feed id as another store
 
-	public function getFeedPath()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_FEED_PATH);
-	}
+		// First make sure we have the data we need
+		$feedId = $this->getApiFeedId($store);
+		$creds = $this->getApiCredentials($store);
 
-	public function getApiFeedId()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_API_FEED_ID);
-	}
-
-	public function getApiSiteId()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_API_SITE_ID);
-	}
-
-	public function getApiBaseUrl()
-	{
-		if($env = getenv(self::ENV_VAR_API_BASE_URL)) {
-			return $env;
-		} else {
-			return Mage::getStoreConfig(self::XML_PATH_API_BASE_URL);
+		if (!$feedId) {
+			throw new Exception("Cannot register with SearchSpring, missing feedId.");
 		}
-	}
-
-	public function getApiSecretKey()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_API_SECRET_KEY);
-	}
-
-	public function getAuthenticationMethod() {
-		return Mage::getStoreConfig(self::XML_PATH_API_AUTHENTICATION_METHOD);
-	}
-
-	public function isCacheImagesEnabled()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_GENERATE_CACHE_IMAGES);
-	}
-
-	public function getImageHeight()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_IMAGE_HEIGHT);
-	}
-
-	public function getImageWidth()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_IMAGE_WIDTH);
-	}
-
-	public function isSwatchImagesEnabled()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_GENERATE_SWATCH_IMAGES);
-	}
-
-	public function getSwatchHeight()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_SWATCH_HEIGHT);
-	}
-
-	public function getSwatchWidth()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_SWATCH_WIDTH);
-	}
-
-	public function getUUID() {
-		return Mage::getStoreConfig(self::XML_PATH_UUID);
-	}
-
-	public function getMageAPIPathGenerate() {
-		switch ($this->getAuthenticationMethod()) {
-			case self::AUTH_METHOD_SIMPLE:
-				return self::MANAGER_API_PATH_GENERATE_SIMPLE;
-			case self::AUTH_METHOD_OAUTH:
-				return self::MANAGER_API_PATH_GENERATE_OAUTH;
+		if (!$creds->isPopulated()) {
+			throw new Exception("Cannot register with SearchSpring, incomplete API credentials.");
 		}
-		return false;
-	}
 
-	public function getMageAPIPathProduct() {
-		switch ($this->getAuthenticationMethod()) {
-			case self::AUTH_METHOD_SIMPLE:
-				return self::MANAGER_API_PATH_PRODUCT_SIMPLE;
-			case self::AUTH_METHOD_OAUTH:
-				return self::MANAGER_API_PATH_PRODUCT_OAUTH;
+		// Register Auth Method
+		$whlp = Mage::helper('searchspring_manager/webservice');
+		switch ($this->getAuthenticationMethod($store)) {
+			case SearchSpring_Manager_Model_Config::AUTH_METHOD_SIMPLE:
+				$whlp->registerMageAPIAuthSimple($feedId, $creds);
+				break;
+			case SearchSpring_Manager_Model_Config::AUTH_METHOD_OAUTH:
+				$whlp->registerMageAPIAuthOAuth($feedId, $creds);
+				break;
+			default:
+				throw new Exception("Cannot register with SearchSpring, missing or unknown authentication method chosen.");
 		}
-		return false;
+
+		// Register store specific API URLs that this module provides
+		$whlp->registerMageAPIUrls(
+			$feedId, $creds,
+			$this->getMageUrlGeneratedFeed($store),	// Feed
+			$this->getMageAPIUrlGenerate($store),	// Batch
+			$this->getMageAPIUrlProduct($store)		// Live
+		);
+
+		// Each register call above will throw an exception in the
+		// event of an unsuccessful result
 	}
 
-	public function getMageAPIUrlGenerate() {
-		return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, true) . $this->getMageAPIPathGenerate();
-	}
+	public function verifySetupWithSearchSpring($store) {
 
-	public function getMageAPIUrlProduct() {
-		return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, true) . $this->getMageAPIPathProduct();
+		// First make sure we have the data we need
+		$feedId = $this->getApiFeedId($store);
+		$creds = $this->getApiCredentials($store);
+
+		if (!$feedId) {
+			throw new Exception("Cannot verify settings with SearchSpring, missing feedId.");
+		}
+		if (!$creds->isPopulated()) {
+			throw new Exception("Cannot verify settings with SearchSpring, incomplete API credentials.");
+		}
+
+		// TODO -- should we cache responses from verify??
+
+		$whlp = Mage::helper('searchspring_manager/webservice');
+		switch ($this->getAuthenticationMethod($store)) {
+			case SearchSpring_Manager_Model_Config::AUTH_METHOD_SIMPLE:
+				return $whlp->verifyMageAPIAuthSimple($feedId, $creds);
+			case SearchSpring_Manager_Model_Config::AUTH_METHOD_OAUTH:
+				return $whlp->verifyMageAPIAuthOAuth($feedId, $creds);
+			default:
+				throw new Exception("Cannot register with SearchSpring, missing or unknown authentication method chosen.");
+		}
+
+		// Each verify call above will throw an exception in the
+		// event of problem connecting to SearchSpring webservice
 	}
 
 	public function writeStoreConfig($path, $value, $scope = 'default', $scopeId = 0) {
 		Mage::getConfig()->saveConfig($path, $value, $scope, $scopeId)->reinit();
-	}
-
-	public function registerMagentoAPIAuthenticationWithSearchSpring($verify = false) {
-
-		$whlp = Mage::helper('searchspring_manager/webservice');
-
-		// TODO -- should we cache responses from verify??
-
-		try {
-
-			switch ($this->getAuthenticationMethod()) {
-				case self::AUTH_METHOD_SIMPLE:
-					if ($verify)
-						$response = $whlp->verifyMageAPIAuthSimple();
-					else
-						$response = $whlp->registerMageAPIAuthSimple();
-					break;
-				case self::AUTH_METHOD_OAUTH:
-					if ($verify)
-						$response = $whlp->verifyMageAPIAuthOAuth();
-					else
-						$response = $whlp->registerMageAPIAuthOAuth();
-					break;
-				default:
-					// TODO - Should we be returning false, this means the setting hasn't been initialized?
-					return false;
-			}
-
-		} catch (Exception $e) {
-			Mage::log(__METHOD__.": Problem while attempting to access the SearchSpring service: " . $e->getMessage());
-			return false;
-		}
-
-		return $response;
 	}
 
 	/**
@@ -240,6 +142,121 @@ class SearchSpring_Manager_Helper_Data extends Mage_Core_Helper_Abstract
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Forwarded Config Getters
+	 */
+
+	public function getVersion() {
+		return $this->config->getVersion();
+	}
+
+	public function getApiBaseUrl() {
+		return $this->config->getApiBaseUrl();
+	}
+
+	public function getUUID() {
+		return $this->config->getUUID();
+	}
+
+	public function getApiSiteId($store) {
+		return $this->config->getApiSiteId($store);
+	}
+
+	public function getApiSecretKey($store) {
+		return $this->config->getApiSecretKey($store);
+	}
+
+	public function getApiFeedId($store) {
+		return $this->config->getApiFeedId($store);
+	}
+
+	public function getAuthenticationMethod($store) {
+		return $this->config->getAuthenticationMethod($store);
+	}
+
+	public function isLiveIndexingEnabled($store = null) {
+		return $this->config->isLiveIndexingEnabled($store);
+	}
+
+	public function isZeroPriceIndexingEnabled($store = null) {
+		return $this->config->isZeroPriceIndexingEnabled($store);
+	}
+
+	public function isOutOfStockIndexingEnabled($store = null) {
+		return $this->config->isOutOfStockIndexingEnabled($store);
+	}
+
+	public function getSalesRankTimespan($store = null) {
+		return $this->config->getSalesRankTimespan($store);
+	}
+
+	public function getFeedPath($store = null) {
+		return $this->config->getFeedPath($store);
+	}
+
+	public function isCacheImagesEnabled($store = null) {
+		return $this->config->isCacheImagesEnabled($store);
+	}
+
+	public function getImageHeight($store = null) {
+		return $this->config->getImageHeight($store);
+	}
+
+	public function getImageWidth($store = null) {
+		return $this->config->getImageWidth($store);
+	}
+
+	public function isSwatchImagesEnabled($store = null) {
+		return $this->config->isSwatchImagesEnabled($store);
+	}
+
+	public function getSwatchHeight($store = null) {
+		return $this->config->getSwatchHeight($store);
+	}
+
+	public function getSwatchWidth($store = null) {
+		return $this->config->getSwatchWidth($store);
+	}
+
+
+	// This config is not really used yet
+	public function isCategorySearchEnabled() {
+		return $this->config->isCategorySearchEnabled();
+	}
+
+
+	public function isStoreSetup($store) {
+		return $this->config->isStoreSetup($store);
+	}
+
+	public function getApiCredentials($store) {
+		return $this->config->getApiCredentials($store);
+	}
+
+	public function getMageApiCredentials($store) {
+		return $this->config->getMageApiCredentials($store);
+	}
+
+	public function getMageAPIPathGenerate($store) {
+		return $this->config->getMageAPIPathGenerate($store);
+	}
+
+	public function getMageAPIPathProduct($store) {
+		return $this->config->getMageAPIPathProduct($store);
+	}
+
+	public function getMageAPIUrlGenerate($store) {
+		return $this->config->getMageAPIUrlGenerate($store);
+	}
+
+	public function getMageAPIUrlProduct($store) {
+		return $this->config->getMageAPIUrlProduct($store);
+	}
+
+	public function getMageUrlGeneratedFeed($store) {
+		return $this->config->getMageUrlGeneratedFeed($store);
 	}
 
 }

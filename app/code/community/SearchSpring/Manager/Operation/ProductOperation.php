@@ -23,7 +23,7 @@ interface SearchSpring_Manager_Operation_ProductOperation
      *
      * @return self
      */
-	public function prepareCollection(Mage_Catalog_Model_Resource_Product_Collection $productCollection);
+	public function prepareCollection($productCollection);
 
     /**
 	 * Prepare the operation after the collection has
@@ -37,7 +37,7 @@ interface SearchSpring_Manager_Operation_ProductOperation
      *
      * @return self
      */
-	public function prepare(Mage_Catalog_Model_Resource_Product_Collection $productCollection);
+	public function prepare($productCollection);
 
     /**
      * Checks validity of operation
