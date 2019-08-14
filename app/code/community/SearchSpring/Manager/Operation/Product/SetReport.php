@@ -24,6 +24,12 @@ class SearchSpring_Manager_Operation_Product_SetReport extends SearchSpring_Mana
 	protected $_enabled = true;
 	protected $_reportData;
 
+	protected $_localReservedFields = array(
+		self::FEED_CART_COUNT,
+		self::FEED_ORDERS_COUNT,
+		self::FEED_ORDERS_QTY
+	);
+
 	/**
 	 * Feed constants
 	 */
@@ -120,6 +126,10 @@ class SearchSpring_Manager_Operation_Product_SetReport extends SearchSpring_Mana
 
 		// Ordered Qty
 		$reportCollection->addOrderedQty($from,$to);
+
+		// Skip Urigy Dropship Multi Load if they have it installed
+		$reportCollection->setFlag('skip_udmulti_load', true);
+
 		foreach($reportCollection as $productReport) {
 			$reportData[$productReport->getId()] = array(
 				'ordered_qty'	=> $productReport->getOrderedQty(),

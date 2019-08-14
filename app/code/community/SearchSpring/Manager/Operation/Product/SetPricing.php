@@ -14,6 +14,13 @@
  */
 class SearchSpring_Manager_Operation_Product_SetPricing extends SearchSpring_Manager_Operation_Product
 {
+    protected $_localReservedFields = array(
+        'price',
+        'regular_price',
+        'normal_price',
+        'final_price'
+    );
+
     /**
      * Set the pricing data
      *

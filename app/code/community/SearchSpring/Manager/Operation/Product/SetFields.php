@@ -24,6 +24,11 @@ class SearchSpring_Manager_Operation_Product_SetFields extends SearchSpring_Mana
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
         foreach($product->getAttributes() as $key => $attribute) {
+
+            if(in_array($key, $this->_globalReservedFields)) {
+                $key = 'ss_mage_attr_' . $key;
+            }
+
 			$value = $this->getAttributeValue($product, $attribute);
 			if (is_array($value)) {
 				foreach($value as $v) {

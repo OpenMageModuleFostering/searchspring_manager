@@ -23,6 +23,13 @@ class SearchSpring_Manager_Operation_Product_SetRatings extends SearchSpring_Man
     const FEED_REVIEWS_COUNT = 'reviews_count';
     /**#@-*/
 
+    protected $_localReservedFields = array(
+        self::FEED_RATING_PERCENTAGE,
+        self::FEED_RATING_STAR,
+        self::FEED_RATING_COUNT,
+        self::FEED_REVIEWS_COUNT,
+    );
+
     /**
      * Set rating data to the feed
      *     - rating_percentage
@@ -41,6 +48,7 @@ class SearchSpring_Manager_Operation_Product_SetRatings extends SearchSpring_Man
             ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
             ->addRateVotes();
 
+        $ratings = array();
         foreach($reviews->getItems() as $review) {
             foreach($review->getRatingVotes() as $vote) {
                 $ratings[] = $vote->getPercent();

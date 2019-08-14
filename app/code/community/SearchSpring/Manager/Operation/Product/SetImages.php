@@ -21,6 +21,12 @@ class SearchSpring_Manager_Operation_Product_SetImages extends SearchSpring_Mana
 	const FEED_THUMBNAIL_URL = 'thumbnail_url';
 	const FEED_CACHED_THUMBNAIL_URL = 'cached_thumbnail_url';
 
+	protected $_localReservedFields = array(
+		self::FEED_IMAGE_URL,
+		self::FEED_THUMBNAIL_URL,
+		self::FEED_CACHED_THUMBNAIL_URL
+	);
+
 	/**
 	 * Url path for product images
 	 */

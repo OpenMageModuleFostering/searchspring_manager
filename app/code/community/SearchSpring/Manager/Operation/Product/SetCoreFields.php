@@ -35,6 +35,23 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 	/**#@-*/
 
 
+	protected $_localReservedFields = array(
+		self::FEED_SKU,
+		self::FEED_PRODUCT_TYPE,
+		self::FEED_DESCRIPTION,
+		self::FEED_SHORT_DESCRIPTION,
+		self::FEED_QUANTITY,
+		self::FEED_IN_STOCK,
+		self::FEED_WEIGHT,
+		self::FEED_URL,
+		self::FEED_NAME,
+		self::FEED_CHILD_QUANTITY,
+		self::FEED_CHILD_SKU,
+		self::FEED_CHILD_NAME,
+		self::FEED_DAYS_OLD,
+		self::FEED_VISIBILITY_IN_SEARCH,
+		self::FEED_VISIBILITY_IN_CATALOG
+	);
 
 	/**
 	 * Add SearchSpring core fields to the feed
@@ -160,6 +177,11 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 
 				foreach($attributeValues as $attribute => $values) {
 					$values = array_unique($values);
+
+					if(in_array($attribute, $this->_globalReservedFields)) {
+						$attribute = 'ss_mage_attr_' . $attribute;
+					}
+
 					foreach($values as $value) {
 						$this->getRecords()->add($attribute, $value);
 					}
@@ -225,7 +247,6 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 
 		$this->getRecords()->set(self::FEED_VISIBILITY_IN_SEARCH, (int) $searchFl);
 		$this->getRecords()->set(self::FEED_VISIBILITY_IN_CATALOG, (int) $catalogFl);
-
 	}
 
 }

@@ -174,6 +174,8 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 				'builder' => $operationsBuilder,
 			)
 		);
+
+		$this->buildReservedFields($operationsCollection);
 	}
 
 	/**
@@ -273,5 +275,21 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 			}
 		}
 	}
+
+	/**
+	 * Go through each operation and build a list of reserved fields to not use
+	 * for attribute fields
+	 */
+	 public function buildReservedFields($operationsCollection) {
+		 $reservedFields = array();
+		 foreach ($operationsCollection as $operation) {
+			 $reservedFields = array_merge($reservedFields, $operation->getLocalReservedFields());
+		 }
+
+		 foreach ($operationsCollection as $operation) {
+			 $operation->setGlobalReservedFields($reservedFields);
+		 }
+
+	 }
 
 }

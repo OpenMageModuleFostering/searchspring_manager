@@ -22,6 +22,12 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
 	const FEED_CATEGORY_IDS = 'category_ids';
     /**#@-*/
 
+    protected $_localReservedFields = array(
+        self::FEED_CATEGORY_HIERARCHY,
+        self::FEED_CATEGORY_NAME,
+        self::FEED_CATEGORY_IDS
+    );
+
 	/**
 	 * Loaded category model cache
 	 *

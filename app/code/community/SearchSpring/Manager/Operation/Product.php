@@ -41,6 +41,18 @@ abstract class SearchSpring_Manager_Operation_Product implements SearchSpring_Ma
     private $parameters;
 
     /**
+     * An array of reserved field names for the current operation that can't be
+     * used for attribute fields.
+     */
+    protected $_localReservedFields = array();
+
+    /**
+     * An array of reserved field names across all operations that can't be used
+     * for attribute fields.
+     */
+    protected $_globalReservedFields = array();
+
+    /**
      * Constructor
      *
      * @param SearchSpring_Manager_String_Sanitizer $sanitizer
@@ -147,4 +159,17 @@ abstract class SearchSpring_Manager_Operation_Product implements SearchSpring_Ma
 	public function prepare($productCollection) {
 		return $this;
 	}
+
+    /**
+     * Returns a list of reserved field names that can't be used by attributes
+     *
+     * @return array
+     */
+    public function getLocalReservedFields() {
+        return $this->_localReservedFields;
+    }
+
+    public function setGlobalReservedFields($reservedFields) {
+        $this->_globalReservedFields = $reservedFields;
+    }
 }

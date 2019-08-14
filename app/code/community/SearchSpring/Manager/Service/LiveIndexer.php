@@ -334,18 +334,24 @@ class SearchSpring_Manager_Service_LiveIndexer
 	 *
 	 * @param mixed $store Magento store object|id|code
 	 * @param SearchSpring_Manager_Entity_IndexingRequestBody $request Live Indexing request
+	 * @param bool $force True to force the request to be sent, ignoring the configuration for live indexing being enabled or not
 	 * @throws Exception
 	 */
-	public function sendRequest($store, SearchSpring_Manager_Entity_IndexingRequestBody $request)
+	public function sendRequest($store, SearchSpring_Manager_Entity_IndexingRequestBody $request, $force = false)
 	{
 		// Make sure there are ids in the request
 		if (!count($request->getIds())) {
 			return;
 		}
 
-		// Make sure we should be indexing this store at all
-		if (!$this->shouldIndexStore($store)) {
-			continue;
+		// Make sure the store is configured for SearchSpring
+		if (!$this->config->isStoreConfigured($store)) {
+			return;
+		}
+
+		// Make sure the store is enabled with live indexing
+		if (!$force && !$this->config->isLiveIndexingEnabled($store)) {
+			return;
 		}
 
 		// Get the API adapter for this store
