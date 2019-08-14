@@ -157,7 +157,12 @@ class SearchSpring_Manager_Operation_Product_SetReport extends SearchSpring_Mana
 		$this->_reportData = $reportData;
 	}
 
-	protected function createReportCollection($productIds, $store) {
+	public function createReportCollection($productIds, $store) {
+
+		// Make sure we have a valid parameter
+		if (!$this->isTimespanValid()) {
+			return;
+		}
 
 		// Start by using the reports collection
 		$reportCollection = Mage::getResourceModel('reports/product_collection');
@@ -199,6 +204,29 @@ class SearchSpring_Manager_Operation_Product_SetReport extends SearchSpring_Mana
 	public function getTimespan() {
 		$timespan = $this->getParameter('timespan');
 		return implode(' ', explode(',', $timespan) );
+	}
+
+	public function getTimespanNumber() {
+		$timespan = $this->getParameter('timespan');
+		$elements = explode(',', $timespan);
+		$number = count($elements) > 1 ? reset($elements) : null;
+		return trim($number);
+	}
+
+	public function isTimespanValid() {
+		$timespanNumber = $this->getTimespanNumber();
+
+		// Shouldn't be empty (0, null, '')
+		if (empty($timespanNumber)) {
+			return false;
+		}
+
+		// Should be numeric
+		if (!is_numeric($timespanNumber)) {
+			return false;
+		}
+
+		return true;
 	}
 
 }
