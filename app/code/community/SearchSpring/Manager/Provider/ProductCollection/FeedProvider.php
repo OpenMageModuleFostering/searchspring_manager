@@ -74,6 +74,8 @@ class SearchSpring_Manager_Provider_ProductCollection_FeedProvider
             Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
         }
 
+        $collection->addAttributeToSort('entity_id');
+
         $collection->getSelect()->limit($this->requestParams->getCount(), $this->requestParams->getOffset());
         $this->collection = $collection;
 

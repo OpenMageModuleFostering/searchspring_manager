@@ -82,6 +82,7 @@ class SearchSpring_Manager_Provider_ProductCollection_ProductProvider
 		$collection->addAttributeToFilter('visibility', array('neq' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE));
 
         if (null !== $this->requestParams) {
+            $collection->addAttributeToSort('entity_id');
             $collection->getSelect()->limit($this->requestParams->getCount(), $this->requestParams->getOffset());
         }
 
