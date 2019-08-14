@@ -59,8 +59,8 @@ class SearchSpring_Manager_Validator_ProductValidator implements Zend_Validate_I
 
 		// if product became not visible
 		if (
-			$visibility === Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
-			&& $origVisibility !== Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
+			$visibility !== Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH
+			&& $origVisibility === Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH
 		) {
 			return true;
 		}
@@ -111,9 +111,9 @@ class SearchSpring_Manager_Validator_ProductValidator implements Zend_Validate_I
 			$this->messages[] = 'Product is not an allowable type.';
 		}
 
-		// product must be visible in either catalog and search
-		if (!$product->isVisibleInSiteVisibility()) {
-			$this->messages[] = 'Product must be visible in either catalog and search';
+		// product must be visible in catalog and search
+		if ((int)$product->getData('visibility') !== Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH) {
+			$this->messages[] = 'Product must be visible in catalog and search';
 		}
 
 		// if we have errors, return false

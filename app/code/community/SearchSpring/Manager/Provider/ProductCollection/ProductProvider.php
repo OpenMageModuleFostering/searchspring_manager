@@ -69,10 +69,8 @@ class SearchSpring_Manager_Provider_ProductCollection_ProductProvider
         /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
         $collection = Mage::getModel('catalog/product')
             ->getCollection()
-			->addAttributeToFilter('entity_id', array('in' => $this->ids))
-		;
-
-		Mage::getSingleton('catalog/product_visibility')->addVisibleInSiteFilterToCollection($collection);
+            ->addAttributeToFilter('entity_id', array('in' => $this->ids))
+			->addAttributeToFilter('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
 
         if (null !== $this->requestParams) {
             $collection->getSelect()->limit($this->requestParams->getCount(), $this->requestParams->getOffset());

@@ -18,10 +18,7 @@ class SearchSpring_Manager_Helper_Data extends Mage_Core_Helper_Abstract
 	const XML_PATH_GLOBAL_LIVE_INDEXING_ENABLE_FL	= 'ssmanager/ssmanager_general/live_indexing';
 	const XML_PATH_INDEX_ZERO_PRICE					= 'ssmanager/ssmanager_general/index_zero_price';
 	const XML_PATH_INDEX_OUT_OF_STOCK				= 'ssmanager/ssmanager_general/index_out_of_stock';
-
-	const XML_PATH_FEED_SETTING_PATH				= 'ssmanager/ssmanager_feed/feed_path';
-
-	const XML_PATH_SALES_RANK_TIMESPAN				= 'ssmanager/ssmanager_sales_rank/timespan';
+	const XML_PATH_FEED_PATH						= 'ssmanager/ssmanager_general/feed_path';
 
 	const XML_PATH_GLOBAL_CATEGORY_ENABLE_FL		= 'ssmanager/ssmanager_catalog/enable_categories';
 
@@ -75,14 +72,9 @@ class SearchSpring_Manager_Helper_Data extends Mage_Core_Helper_Abstract
 		return Mage::getStoreConfigFlag(self::XML_PATH_INDEX_OUT_OF_STOCK);
 	}
 
-	public function getSalesRankTimespan()
-	{
-		return Mage::getStoreConfig(self::XML_PATH_SALES_RANK_TIMESPAN);
-	}
-
 	public function getFeedPath()
 	{
-		return Mage::getStoreConfig(self::XML_PATH_FEED_SETTING_PATH);
+		return Mage::getStoreConfig(self::XML_PATH_FEED_PATH);
 	}
 
 	public function getApiFeedId()

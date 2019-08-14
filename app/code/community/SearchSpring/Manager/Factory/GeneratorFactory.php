@@ -133,8 +133,6 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 		SearchSpring_Manager_Entity_OperationsCollection $operationsCollection,
 		SearchSpring_Manager_Entity_RecordsCollection $productRecords
 	) {
-		$hlp = Mage::helper('searchspring_manager');
-
 		$operationsBuilder->setSanitizer(new SearchSpring_Manager_String_Sanitizer())
 			->setRecords($productRecords)
 			->setClassPrefix(SearchSpring_Manager_Operation_Product::OPERATION_CLASS_PREFIX);
@@ -144,20 +142,13 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 		$operationsCollection->append($operationsBuilder->build('SetImages'));
 		$operationsCollection->append($operationsBuilder->build('SetOptions'));
 		$operationsCollection->append($operationsBuilder->build('SetCategories'));
-
-		// Parameter for timespan comes from user configuration, by default
-		$operationsCollection->append($operationsBuilder->build('SetReport',
-				array(
-					'timespan' => $hlp->getSalesRankTimespan(),
-				)
-			)
-		);
+		$operationsCollection->append($operationsBuilder->build('SetReport'));
 
 		// add pricing factory and if we should display zero priced products as additional data
 		$operationsCollection->append($operationsBuilder->build('SetPricing',
 				array(
 					'pricingFactory' => new SearchSpring_Manager_Factory_PricingFactory(),
-					'displayZeroPrice' => (int)$hlp->isZeroPriceIndexingEnabled(),
+					'displayZeroPrice' => (int)Mage::helper('searchspring_manager')->isZeroPriceIndexingEnabled(),
 				)
 			)
 		);

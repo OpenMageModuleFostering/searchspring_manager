@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<SearchSpring_Manager>
-			<version>1.10.2</version>
+			<version>1.9.0</version>
 		</SearchSpring_Manager>
 	</modules>
 	<global>
@@ -169,6 +169,7 @@
 		<ssmanager>
 			<ssmanager_general>
 				<live_indexing>0</live_indexing>
+				<feed_path>media/searchspring/feed/</feed_path>
 			</ssmanager_general>
 			<ssmanager_catalog>
 				<enable_categories>0</enable_categories>
@@ -176,12 +177,6 @@
 			<ssmanager_images>
 				<generate_cache_images>1</generate_cache_images>
 			</ssmanager_images>
-			<ssmanager_feed>
-				<feed_path>media/searchspring/feed/</feed_path>
-			</ssmanager_feed>
-			<ssmanager_sales_rank>
-				<timespan>6,month</timespan>
-			</ssmanager_sales_rank>
 			<ssmanager_api>
 				<authentication_method>simple</authentication_method>
 			</ssmanager_api>

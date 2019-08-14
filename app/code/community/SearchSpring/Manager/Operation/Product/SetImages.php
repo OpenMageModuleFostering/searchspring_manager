@@ -75,26 +75,13 @@ class SearchSpring_Manager_Operation_Product_SetImages extends SearchSpring_Mana
 		$this->getRecords()->set(self::FEED_IMAGE_URL, $mediaBaseUrl . self::PREFIX_MEDIA_PRODUCT . $product->getData('image'));
 		$this->getRecords()->set(self::FEED_THUMBNAIL_URL, $mediaBaseUrl . self::PREFIX_MEDIA_PRODUCT . $product->getData('thumbnail'));
 
+		/** @var Mage_Catalog_Helper_Image $imageHelper */
+		$imageHelper = Mage::helper('catalog/image');
+
 		if(Mage::helper('searchspring_manager')->isCacheImagesEnabled()) {
-
-			/** @var SearchSpring_Manager_Helper_Catalog_Image $imageHelper */
-			$imageHelper = Mage::helper('searchspring_manager/catalog_image');
-
-			$imageHelper->init($product, 'image')->resize($this->_imageWidth, $this->_imageHeight);
-
-			Varien_Profiler::start(__METHOD__.": imageHelper->ifCachedGetUrl");
-			$imageUrl = $imageHelper->ifCachedGetUrl();
-			Varien_Profiler::stop(__METHOD__.": imageHelper->ifCachedGetUrl");
-
-			if (!$imageUrl) {
-				Varien_Profiler::start(__METHOD__.": getting image resize");
-				$imageUrl = (string) $imageHelper;
-				Varien_Profiler::stop(__METHOD__.": getting image resize");
-			}
-
 			$this->getRecords()->set(
 				self::FEED_CACHED_THUMBNAIL_URL,
-				$imageUrl
+				(string) $imageHelper->init($product, 'image')->resize($this->_imageWidth, $this->_imageHeight)
 			);
 		}
 
