@@ -57,7 +57,7 @@ jQuery.noConflict();
         function loginSearchSpring() {
             loginButton.addClass('loading');
             $.ajax({
-                url: 'https://api.searchspring.net/api/manage/users/get-feeds.json',
+                url: 'https://api-beta.searchspring.net/api/manage/users/get-feeds.json',
                 type: 'POST',
                 dataType: 'jsonp',
                 success : login,

@@ -31,21 +31,19 @@ class SearchSpring_Manager_Factory_PricingFactory
 		switch($productType) {
 			case Mage_Catalog_Model_Product_Type::TYPE_SIMPLE:
 				$strategy = new SearchSpring_Manager_Strategy_Pricing_SimpleStrategy($product);
-
 				break;
 			case Mage_Catalog_Model_Product_Type::TYPE_GROUPED:
 				$strategy = new SearchSpring_Manager_Strategy_Pricing_GroupedStrategy($product);
-
 				break;
 			case Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE:
 				$strategy = new SearchSpring_Manager_Strategy_Pricing_ConfigurableStrategy($product);
 				break;
 			case Mage_Catalog_Model_Product_Type::TYPE_BUNDLE:
 				$strategy = new SearchSpring_Manager_Strategy_Pricing_BundleStrategy($product);
-
 				break;
 			default:
-				throw new UnexpectedValueException('Could not resolve product type');
+				$strategy = new SearchSpring_Manager_Strategy_Pricing_DefaultStrategy($product);
+				break;
 		}
 
 		return $strategy;
