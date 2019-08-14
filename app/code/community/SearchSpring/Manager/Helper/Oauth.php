@@ -26,7 +26,14 @@ class SearchSpring_Manager_Helper_Oauth extends Mage_Core_Helper_Abstract
 	}
 
 	public function isSupported() {
-		return $this->hlp()->isModuleEnabled('Mage_Oauth') && $this->hlp()->isModuleEnabled('Mage_Api3');
+		// The oauth functionality contained within this class (and
+		// module as a whole really) depends on the OAuth and Api2
+		// Modules. While these would mostly only exist together,
+		// it's safest to verify that both are enabled.
+		return (
+			$this->hlp()->isModuleEnabled('Mage_Oauth') &&
+			$this->hlp()->isModuleEnabled('Mage_Api2')
+		);
 	}
 
 	public function getAdminUser() {

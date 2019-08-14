@@ -50,10 +50,16 @@ abstract class SearchSpring_Manager_Operation_Product implements SearchSpring_Ma
     public function __construct(
         SearchSpring_Manager_String_Sanitizer $sanitizer,
         SearchSpring_Manager_Entity_RecordsCollection $records,
-        array $parameters = array()
+        array $parameters = array(),
+        SearchSpring_Manager_Model_Config $config = NULL
     ) {
+        if(is_null($config)) {
+            $config = Mage::helper('searchspring_manager')->getConfig();
+        }
+
         $this->sanitizer = $sanitizer;
         $this->records = $records;
+        $this->config = $config;
         $this->parameters = $parameters;
     }
 
@@ -120,6 +126,15 @@ abstract class SearchSpring_Manager_Operation_Product implements SearchSpring_Ma
     }
 
     /**
+     * Gets the config object
+     *
+     * @return SearchSpring_Manager_Model_Config
+     */
+    protected final function getConfig() {
+        return $this->config;
+    }
+
+    /**
      * {@inheritdoc}
      */
 	public function prepareCollection($productCollection) {
@@ -132,5 +147,4 @@ abstract class SearchSpring_Manager_Operation_Product implements SearchSpring_Ma
 	public function prepare($productCollection) {
 		return $this;
 	}
-
 }

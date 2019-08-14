@@ -22,8 +22,8 @@ class SearchSpring_Manager_Model_Observer_ConfigObserver extends SearchSpring_Ma
 	}
 
 	public function getStore() {
-		$configModel = Mage::getSingleton('adminhtml/config_data');
-		if ($store = $configModel->getStore()) {
+		// Get the param for store code, we'll always be in the context of the config section
+		if ($store = Mage::app()->getRequest()->getParam('store')) {
 			return Mage::app()->getStore($store);
 		}
 		return null;
