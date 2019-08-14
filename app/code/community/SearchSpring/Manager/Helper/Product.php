@@ -31,16 +31,13 @@ class SearchSpring_Manager_Helper_Product extends Mage_Core_Helper_Abstract
 		if ($attribute->getFrontendInput() === 'boolean' ||
 			$attribute->getFrontendInput() === 'select'
 		) {
+
 			// Magento's Attribute Frontend getValue() function
 			// returns 'No' for optional attributes with nothing
 			// set, specifically for these types...
 			// So we'll just try and resolve from the attribute
 			// options map, or empty if the value isn't set.
 			return $product->getAttributeText($attributeCode);
-
-		} else if ($attribute->getFrontendInput() === 'date') {
-			// dates are the special
-			return $product->getData($attributeCode);
 
 		} else {
 

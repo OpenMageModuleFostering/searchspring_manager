@@ -62,7 +62,7 @@
 				<td class="value">
 					<select id="ssmanager_ssmanager_setup_authentication_method" tabindex="2" class=" input-text">
 						<?php foreach ($this->getAuthMethods() as $method): ?>
-							<option value="<?php echo $method['value'] ?>"><?php echo $method['label'] ?></option>
+							<option value="<?= $method['value'] ?>"><?= $method['label'] ?></option>
 						<?php endforeach; ?>
 					</select>
 				</td>

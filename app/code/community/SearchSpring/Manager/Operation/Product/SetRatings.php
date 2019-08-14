@@ -20,7 +20,6 @@ class SearchSpring_Manager_Operation_Product_SetRatings extends SearchSpring_Man
     const FEED_RATING_PERCENTAGE = 'rating_percentage';
     const FEED_RATING_STAR = 'rating_star';
     const FEED_RATING_COUNT = 'rating_count';
-    const FEED_REVIEWS_COUNT = 'reviews_count';
     /**#@-*/
 
     /**
@@ -35,26 +34,22 @@ class SearchSpring_Manager_Operation_Product_SetRatings extends SearchSpring_Man
      */
     public function perform(Mage_Catalog_Model_Product $product)
     {
-        $reviews = Mage::getModel('review/review')
+        $votes = Mage::getModel('rating/rating_option_vote')
             ->getResourceCollection()
-            ->addEntityFilter('product', $product->getId())
-            ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
-            ->addRateVotes();
+            ->setEntityPkFilter($product->getId())
+            ->load();
 
         $ratings = array();
-        foreach($reviews->getItems() as $review) {
-            foreach($review->getRatingVotes() as $vote) {
-                $ratings[] = $vote->getPercent();
-            }
+        foreach ($votes as $vote) {
+            $ratings[] = $vote['percent'];
         }
 
-        $ratingCount = count($ratings);
+        $ratingCount = count($votes);
 
         $ratingPercentage = (0 === $ratingCount) ? 0 : array_sum($ratings) / $ratingCount;
         $this->getRecords()->set(self::FEED_RATING_PERCENTAGE, $ratingPercentage);
         $this->getRecords()->set(self::FEED_RATING_STAR, round($ratingPercentage / 20));
         $this->getRecords()->set(self::FEED_RATING_COUNT, $ratingCount);
-        $this->getRecords()->set(self::FEED_REVIEWS_COUNT, count($reviews));
 
         return $this;
     }

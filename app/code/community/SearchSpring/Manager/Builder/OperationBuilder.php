@@ -183,10 +183,8 @@ class SearchSpring_Manager_Builder_OperationBuilder
             throw new UnexpectedValueException('Class name must not be null');
         }
 
-        $hlp = Mage::helper('searchspring_manager');
-
         $class = ($useClassPrefix) ? $this->classPrefix . $this->className : $this->className;
-        $operation = new $class($this->sanitizer, $this->records, $parameters, $hlp->getConfig());
+        $operation = new $class($this->sanitizer, $this->records, $parameters);
 
         $class = 'SearchSpring_Manager_Operation_Product';
         if (!$operation instanceof $class) {

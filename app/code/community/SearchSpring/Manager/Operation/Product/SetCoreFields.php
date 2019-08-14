@@ -102,11 +102,8 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 	 */
 	private function getQuantity(Mage_Catalog_Model_Product $product)
 	{
-		$stock_item = $product->getData('stock_item');
-		$quantity = 0;
-		if(is_object($stock_item) && method_exists($stock_item, 'getData')) {
-			$quantity = $stock_item->getData('qty');
-		}
+		$quantity = $product->getData('stock_item')->getData('qty');
+
 		return (int)$quantity;
 	}
 
@@ -131,40 +128,14 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 				/** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
 				$typeInstance = $product->getTypeInstance(true);
 
-				$attributes = array();
-				foreach ($typeInstance->getConfigurableAttributes($product) as $attribute) {
-					$attributes[] = $attribute->getProductAttribute()->getAttributeCode();
+				/** @var Mage_Catalog_Model_Product_Type_Configurable_Attribute $attribute */
+				foreach ($typeInstance->getConfigurableAttributesAsArray($product) as $attribute) {
+					foreach ($attribute['values'] as $value) {
+						$this->getRecords()->add($attribute['attribute_code'], $value['label']);
+					}
 				}
 
-				$displayOos = $this->getConfig()->isOutOfStockIndexingEnabled($product->getStoreId());
 				$children = $typeInstance->getUsedProducts(null, $product);
-
-				$attributeValues = array();
-				foreach($children as $child) {
-					$stockItem = $child->getStockItem();
-
-					if(
-						// Check the stockItem even exists, customers are stupid
-						is_object($stockItem) && method_exists($stockItem, 'getIsInStock') &&
-						// If not indexing out of stock products, skip out of stock options
-						!$stockItem->getIsInStock() && !$displayOos
-					) {
-						continue;
-					}
-
-					foreach($attributes as $attribute) {
-						$attributeValues[$attribute][] = $child->getAttributeText($attribute);
-					}
-
-				}
-
-				foreach($attributeValues as $attribute => $values) {
-					$values = array_unique($values);
-					foreach($values as $value) {
-						$this->getRecords()->add($attribute, $value);
-					}
-				}
-
 				$childQuantity = $this->getQuantityForChildren($children);
 
 				break;

@@ -106,11 +106,6 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 
 	public function preDispatch()
 	{
-
-		if ($this->shouldProfile()) {
-			Varien_Profiler::enable();
-		}
-
  		// Do not start standart session
 		$this->setFlag('', self::FLAG_NO_START_SESSION, 1);
 
@@ -266,11 +261,6 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 		$this->getResponse()->setHttpResponseCode($responseCode);
 
 		$responseBody = Zend_Json::encode($message);
-
-		if ($this->shouldProfile()) {
-			$responseBody .= "\n\nProfiler Data:\n" . Mage::helper('searchspring_manager/profiler')->fetchHumanReadable();
-		}
-
 		$this->getResponse()->setBody($responseBody);
 	}
 
@@ -284,16 +274,7 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 	{
 		$this->getResponse()->setHeader('Content-type', 'text/plain');
 		$this->getResponse()->setHttpResponseCode($responseCode);
-
-		if ($this->shouldProfile()) {
-			$message .= "\n\nProfiler Data:\n" . Mage::helper('searchspring_manager/profiler')->fetchHumanReadable();
-		}
-
 		$this->getResponse()->setBody($message);
 	}
 
-	private function shouldProfile() {
-		$param = $this->getRequest()->getParam('profiler');
-		return ($param == 'true');
-	}
 }

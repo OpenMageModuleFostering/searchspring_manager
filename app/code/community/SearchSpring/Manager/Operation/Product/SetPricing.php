@@ -37,7 +37,6 @@ class SearchSpring_Manager_Operation_Product_SetPricing extends SearchSpring_Man
         $this->getRecords()->set('price', $pricingStrategy->getSalePrice());
         $this->getRecords()->set('regular_price', $pricingStrategy->getTierPrice());
         $this->getRecords()->set('normal_price', $pricingStrategy->getNormalPrice());
-        $this->getRecords()->set('final_price', $pricingStrategy->getFinalPrice());
 
         return $this;
     }

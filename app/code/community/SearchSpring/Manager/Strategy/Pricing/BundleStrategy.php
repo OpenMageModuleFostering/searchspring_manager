@@ -43,20 +43,15 @@ class SearchSpring_Manager_Strategy_Pricing_BundleStrategy extends SearchSpring_
 			$tierPrices = array();
 			$salePrices = array();
 
-			$bundleOptionSelections = $bundleOption->getData('selections');
-			if(
-				is_array($bundleOptionSelections) ||
-				$bundleOptionSelections instanceof Traversable
-			) {
-				foreach ($bundleOptionSelections as $product) {
-					$regularPrice = (double)$product->getPrice();
-					$tierPrice = (double)$this->getLowestTierPrice($product);
-					$salePrice = (double)$product->getFinalPrice();
+			/** @var Mage_Catalog_Model_Product $product */
+			foreach ($bundleOption->getData('selections') as $product) {
+				$regularPrice = (double)$product->getPrice();
+				$tierPrice = (double)$this->getLowestTierPrice($product);
+				$salePrice = (double)$product->getFinalPrice();
 
-					$regularPrices[] = $regularPrice;
-					$tierPrices[] = $tierPrice;
-					$salePrices[] = $salePrice;
-				}
+				$regularPrices[] = $regularPrice;
+				$tierPrices[] = $tierPrice;
+				$salePrices[] = $salePrice;
 			}
 
 			$totalRegularPrice += $this->findMinPrice($regularPrices);

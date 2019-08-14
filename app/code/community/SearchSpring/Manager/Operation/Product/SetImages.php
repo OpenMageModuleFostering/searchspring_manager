@@ -31,18 +31,17 @@ class SearchSpring_Manager_Operation_Product_SetImages extends SearchSpring_Mana
 	protected $_imageHeight;
 	protected $_imageWidth;
 
-
+	
 	public function __construct(
 		SearchSpring_Manager_String_Sanitizer $sanitizer,
 		SearchSpring_Manager_Entity_RecordsCollection $records,
-		array $parameters = array(),
-		SearchSpring_Manager_Model_Config $config = NULL
+		array $parameters = array()
 	) {
-		parent::__construct($sanitizer, $records, $parameters, $config);
+		parent::__construct($sanitizer, $records, $parameters);
 
-		if($this->config->isCacheImagesEnabled()) {
-			$this->_imageWidth = $this->config->getImageWidth();
-			$this->_imageHeight = $this->config->getImageHeight();
+		if(Mage::helper('searchspring_manager')->isCacheImagesEnabled()) {
+			$this->_imageWidth = Mage::helper('searchspring_manager')->getImageWidth();
+			$this->_imageHeight = Mage::helper('searchspring_manager')->getImageHeight();
 
 			if (empty($this->_imageWidth)) {
 				if (!empty($this->_imageHeight)) {
@@ -61,7 +60,7 @@ class SearchSpring_Manager_Operation_Product_SetImages extends SearchSpring_Mana
 
 		}
 	}
-
+	
 	/**
 	 * Set magento product options to the feed
 	 *
@@ -76,7 +75,7 @@ class SearchSpring_Manager_Operation_Product_SetImages extends SearchSpring_Mana
 		$this->getRecords()->set(self::FEED_IMAGE_URL, $mediaBaseUrl . self::PREFIX_MEDIA_PRODUCT . $product->getData('image'));
 		$this->getRecords()->set(self::FEED_THUMBNAIL_URL, $mediaBaseUrl . self::PREFIX_MEDIA_PRODUCT . $product->getData('thumbnail'));
 
-		if($this->config->isCacheImagesEnabled()) {
+		if(Mage::helper('searchspring_manager')->isCacheImagesEnabled()) {
 
 			/** @var SearchSpring_Manager_Helper_Catalog_Image $imageHelper */
 			$imageHelper = Mage::helper('searchspring_manager/catalog_image');

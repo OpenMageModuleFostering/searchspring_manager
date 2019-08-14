@@ -38,19 +38,11 @@ abstract class SearchSpring_Manager_Strategy_Pricing_Strategy implements SearchS
 	private $tierPrice;
 
 	/**
-	 * The minimal price of product from all types
-	 *
-	 * @var double $salePrice
-	 */
-	private $salePrice;
-
-
-	/**
 	 * The price of the product from getFinalPrice()
 	 *
 	 * @var double $salePrice
 	 */
-	private $finalPrice;
+	private $salePrice;
 
 	/**
 	 * {@inheritdoc}
@@ -130,14 +122,6 @@ abstract class SearchSpring_Manager_Strategy_Pricing_Strategy implements SearchS
 	protected function setSalePrice($price)
 	{
 		$this->salePrice = $price;
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getFinalPrice()
-	{
-		return $this->formatPrice($this->salePrice);
 	}
 
 	/**

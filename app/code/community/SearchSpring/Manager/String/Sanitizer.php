@@ -22,10 +22,7 @@ class SearchSpring_Manager_String_Sanitizer
 	 */
 	public function sanitizeForRequest($value)
 	{
-		// Remove all control characters, except new lines
-		// Code points 0 - 31, except 10
-		// Code points x00 - x1F, except x0A
-		$value = preg_replace('/[\x00-\x09\x0B-\x1F]*/','', $value);
+		$value = preg_replace('/[^(\x20-\x7F)\x0A]*/','', $value);
 
 		return $value;
 	}

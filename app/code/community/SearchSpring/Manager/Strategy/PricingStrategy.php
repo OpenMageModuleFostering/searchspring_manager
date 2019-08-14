@@ -46,11 +46,4 @@ interface SearchSpring_Manager_Strategy_PricingStrategy
 	 * @return double
 	 */
 	public function getSalePrice();
-
-	/**
-	 * Return the lowest price non-tier price
-	 *
-	 * @return double
-	 */
-	public function getFinalPrice();
 }
