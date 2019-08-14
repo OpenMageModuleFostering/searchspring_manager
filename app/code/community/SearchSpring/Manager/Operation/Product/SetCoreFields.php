@@ -102,8 +102,11 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 	 */
 	private function getQuantity(Mage_Catalog_Model_Product $product)
 	{
-		$quantity = $product->getData('stock_item')->getData('qty');
-
+		$stock_item = $product->getData('stock_item');
+		$quantity = 0;
+		if(is_object($stock_item) && method_exists($stock_item, 'getData')) {
+			$quantity = $stock_item->getData('qty');
+		}
 		return (int)$quantity;
 	}
 
