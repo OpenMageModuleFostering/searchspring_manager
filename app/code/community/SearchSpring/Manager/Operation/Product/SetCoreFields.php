@@ -200,7 +200,10 @@ class SearchSpring_Manager_Operation_Product_SetCoreFields extends SearchSpring_
 
 				/** @var Mage_Bundle_Model_Option $bundleOption */
 				foreach ($bundleOptions as $bundleOption) {
-					$childQuantity += $this->getQuantityForChildren($bundleOption->getData('selections'));
+					$products = $bundleOption->getData('selections');
+					if (is_array($products)) {
+						$childQuantity += $this->getQuantityForChildren($products);
+					}
 				}
 
 				break;
