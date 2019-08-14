@@ -61,9 +61,11 @@ class SearchSpring_Manager_Handler_ApiErrorHandler
 	 */
 	private function notifyUser()
 	{
-		/** @var Mage_Core_Model_Session $session */
-		$session = Mage::getSingleton('core/session');
-		$session->addNotice('There was a problem while trying to update SearchSpring.  This issue will be investigated.');
+		if(Mage::app()->getStore()->isAdmin()) {
+			/** @var Mage_Core_Model_Session $session */
+			$session = Mage::getSingleton('core/session');
+			$session->addNotice('There was a problem while trying to update SearchSpring.  This issue will be investigated.');
+		}
 	}
 
 	/**

@@ -43,4 +43,25 @@ class SearchSpring_ErrorCodes
      * Ids parameter not found
      */
     const IDS_NOT_SET = 6;
+
+	/**
+	 * BAD REQUEST FORMAT
+	 */
+	const BAD_REQUEST = 7;
+
+	/**
+	 * Unknown Error
+	 */
+	const UNKNOWN_EXCEPTION = 8;
+
+	/**
+	 * Authentication Credentials - Invalid
+	 */
+	const AUTH_CREDENTIALS_INVALID = 9;
+
+	/**
+	 * Authentication Credentials - Missing
+	 */
+	const AUTH_CREDENTIALS_MISSING = 10;
+
 }

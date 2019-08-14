@@ -66,6 +66,13 @@ class SearchSpring_Manager_Writer_Product_Params_FileWriterParams
 	 */
 	private $filename;
 
+	/**
+	 * The base directory
+	 *
+	 * @var string $filename
+	 */
+    private $baseDir;
+
     /**
      * @var SearchSpring_Manager_Entity_RequestParams
      */
@@ -77,13 +84,47 @@ class SearchSpring_Manager_Writer_Product_Params_FileWriterParams
      * @param SearchSpring_Manager_Entity_RequestParams $requestParams
      * @param int $totalProducts
      * @param string $uniqueFilename
+     * @param string $baseDir Relative to the magento installation directory
      */
-	public function __construct(SearchSpring_Manager_Entity_RequestParams $requestParams, $totalProducts, $uniqueFilename)
+	public function __construct(SearchSpring_Manager_Entity_RequestParams $requestParams, $totalProducts, $uniqueFilename, $baseDir)
 	{
         $this->requestParams = $requestParams;
 		$this->totalProducts = $totalProducts;
 		$this->uniqueFilename = $uniqueFilename;
+		$this->baseDir = Mage::getBaseDir() . DS . $baseDir;
+
+		$this->validateBaseDir();
     }
+
+	/**
+	 * Validate base directory
+	 *
+	 * @return string
+	 */
+	public function validateBaseDir() {
+
+		// Make sure the directory exists
+		if (file_exists($this->baseDir)) {
+			// Make sure the directory isn't a file
+			if (!is_dir($this->baseDir)) {
+				throw new Exception("Output directory is not a directory; cannot write file.");
+			}
+			// Make sure the directory is writable
+			if (!is_dir_writeable($this->baseDir)) {
+				throw new Exception("Output directory is not a writable; cannot write file.");
+			}
+		}
+		
+		// Try to create the directory path
+		else {
+			$oldUmask = umask(0);
+			if (!@mkdir($this->baseDir, 0777, true)) {
+				throw new Exception("Output directory path could not be created, most likely because of insufficient privileges; cannot write file.");
+			}
+			umask($oldUmask);
+		}
+
+	}
 
     /**
      * Get the request parameters object
@@ -131,7 +172,7 @@ class SearchSpring_Manager_Writer_Product_Params_FileWriterParams
 	public function getTempFilename()
 	{
 		if (null === $this->tempFilename) {
-			$this->tempFilename = Mage::getBaseDir()
+			$this->tempFilename = $this->baseDir
 				. DS
 				. sprintf(self::FILENAME_TEMP_PATTERN, $this->requestParams->getStore(), $this->uniqueFilename);
 		}
@@ -147,9 +188,10 @@ class SearchSpring_Manager_Writer_Product_Params_FileWriterParams
 	public function getFilename()
 	{
 		if (null === $this->filename) {
-			$this->filename = Mage::getBaseDir() . DS . sprintf(self::FILENAME_FINAL_PATTERN, $this->requestParams->getStore());
+			$this->filename = $this->baseDir . DS . sprintf(self::FILENAME_FINAL_PATTERN, $this->requestParams->getStore());
 		}
 
 		return $this->filename;
 	}
+
 }

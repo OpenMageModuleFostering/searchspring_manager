@@ -27,135 +27,242 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 	 */
 	const STORE_DEFAULT = 'default';
 
-    /**
-     * Default action for updating based on product/category id
-     *
-     * Parameters:
-     *     type (required): The type of id passed in. Can be 'product' or 'category'
-     *     ids (required): An array of ids
-     */
-    public function indexAction()
-    {
+	/**
+	 * Default action for updating based on product/category id
+	 *
+	 * Parameters:
+	 *	 type (required): The type of id passed in. Can be 'product' or 'category'
+	 *	 ids (required): An array of ids
+	 */
+	public function indexAction()
+	{
 		$request = new SearchSpring_Manager_Request_JSON($this->getRequest());
 
 		$type = $request->getParam('type');
 		$ids = $request->getParam('ids');
 
-        if (null === $type) {
-            $this->setJsonResponse(
-                array(
-                    'status' => 'error',
-                    'errorCode' => SearchSpring_ErrorCodes::TYPE_NOT_SET,
-                    'message' => 'Type must be specified'
-                ),
-                400
-            );
+		if (null === $type) {
+			$this->respondWithError('Type must be specified', SearchSpring_ErrorCodes::TYPE_NOT_SET, 400);
+		}
 
-            return;
-        }
+		if (null === $ids) {
+			$this->respondWithError('Ids must be specified', SearchSpring_ErrorCodes::IDS_NOT_SET, 400);
+		}
 
-        if (null === $ids) {
-            $this->setJsonResponse(
-                array(
-                    'status' => 'error',
-                    'errorCode' => SearchSpring_ErrorCodes::IDS_NOT_SET,
-                    'message' => 'Ids must be specified'
-                ),
-                400
-            );
+		$requestParams =  new SearchSpring_Manager_Entity_RequestParams(
+			(int)$request->getParam('size', null),
+			(int)$request->getParam('start', null),
+			$request->getParam('store', self::STORE_DEFAULT)
+		);
 
-            return;
-        }
+		$params = array('ids' => $ids);
 
-        $requestParams =  new SearchSpring_Manager_Entity_RequestParams(
-            (int)$request->getParam('size', null),
-            (int)$request->getParam('start', null),
-            $request->getParam('store', self::STORE_DEFAULT)
-        );
+		try {
+			$generatorFactory = new SearchSpring_Manager_Factory_GeneratorFactory();
+			$generator = $generatorFactory->make($type, $requestParams, $params);
+			$message = $generator->generate();
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
 
-        $params = array('ids' => $ids);
-
-        $generatorFactory = new SearchSpring_Manager_Factory_GeneratorFactory();
-        $generator = $generatorFactory->make($type, $requestParams, $params);
-        $message = $generator->generate();
-
-        $this->setJsonResponse($message);
-    }
-
+		$this->setJsonResponse($message);
+	}
 
 	/**
 	 * Generate an xml feed of all products
 	 *
 	 * Parameters:
-	 *     filename (required): A unique filename when creating temporary files.
-	 *     start (optional): The starting point for fetching products. Defaults to 0.
-	 *     count (optional): The number of products to fetch. Defaults to 100.
-	 *     store (optional): The store name as a string. Defaults to 'default'
+	 *	 filename (required): A unique filename when creating temporary files.
+	 *	 start (optional): The starting point for fetching products. Defaults to 0.
+	 *	 count (optional): The number of products to fetch. Defaults to 100.
+	 *	 store (optional): The store name as a string. Defaults to 'default'
 	 */
 	public function feedAction()
 	{
-		// check file is writable first
-		if (!is_writable(Mage::getBaseDir())) {
-			$this->setJsonResponse(
-                array(
-                    'status' => 'error',
-                    'errorCode' => SearchSpring_ErrorCodes::DIR_NOT_WRITABLE,
-                    'message' => 'Magento base directory is not writable'
-                ),
-                500
-            );
-
-			return;
-		}
-
 		$uniqueFilename = $this->getRequest()->getParam('filename');
 
 		if (null === $uniqueFilename) {
-			$this->setJsonResponse(
-                array(
-                    'status' => 'error',
-                    'errorCode' => SearchSpring_ErrorCodes::FILENAME_NOT_SET,
-                    'message' => 'Unique filename must be passed in'
-                ),
-                400
-            );
-
-			return;
+			$this->respondWithError('Filename must be specified', SearchSpring_ErrorCodes::FILENAME_NOT_SET, 400);
 		}
 
-        $requestParams =  new SearchSpring_Manager_Entity_RequestParams(
-            (int)$this->getRequest()->getParam('count', self::COUNT_DEFAULT),
-            (int)$this->getRequest()->getParam('start', self::OFFSET_DEFAULT),
-            $this->getRequest()->getParam('store', self::STORE_DEFAULT)
-        );
+		$requestParams =  new SearchSpring_Manager_Entity_RequestParams(
+			(int)$this->getRequest()->getParam('count', self::COUNT_DEFAULT),
+			(int)$this->getRequest()->getParam('start', self::OFFSET_DEFAULT),
+			$this->getRequest()->getParam('store', self::STORE_DEFAULT)
+		);
 
-        $params = array('filename' => $uniqueFilename);
+		$params = array('filename' => $uniqueFilename);
 
-        $generatorFactory = new SearchSpring_Manager_Factory_GeneratorFactory();
-        $generator = $generatorFactory->make(
-            SearchSpring_Manager_Factory_GeneratorFactory::TYPE_FEED,
-            $requestParams,
-            $params
-        );
-        $message = $generator->generate();
+		try {
 
-        $this->setTextResponse($message);
+			$generatorFactory = new SearchSpring_Manager_Factory_GeneratorFactory();
+			$generator = $generatorFactory->make(
+				SearchSpring_Manager_Factory_GeneratorFactory::TYPE_FEED,
+				$requestParams,
+				$params
+			);
+			$message = $generator->generate();
 
-        return;
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
+
+		$this->setTextResponse($message);
 	}
 
-    /**
-     * Set appropriate response variables for a json response
-     *
-     * @param array $message The message that should be sent back
-     * @param int $responseCode The Http response code
-     */
+	public function preDispatch()
+	{
+ 		// Do not start standart session
+		$this->setFlag('', self::FLAG_NO_START_SESSION, 1);
+
+		parent::preDispatch();
+
+		try {
+
+			// Make sure this access method is enabled
+			if (!$this->isEnabled()) {
+				$this->_redirect('noroute');
+				$this->setFlag('',self::FLAG_NO_DISPATCH,true);
+				return $this;
+			}
+
+			// Validate Authentication
+			$this->_authenticate();
+
+		} catch (Exception $e) {
+			$this->handleException($e);
+		}
+
+		return $this;
+	}
+
+	protected function isEnabled() {
+		$helper = Mage::helper('searchspring_manager');
+		// For now, this controller only handles the 'simple' auth method
+		$authenticationMethod = $helper->getAuthenticationMethod();
+		return $authenticationMethod == 'simple';
+	}
+
+	protected function _authenticate() {
+
+		$helper = Mage::helper('searchspring_manager/http');
+		list($username, $password) = $helper->isSimpleAuthProvided(true); // true, itemized
+
+		// Make sure auth username was provided
+		if(empty($username)) {
+			$this->respondWithError(
+				'Authentication Failed: Missing username',
+				SearchSpring_ErrorCodes::AUTH_CREDENTIALS_MISSING,
+				401
+			);
+		}
+
+		// Make sure auth password was provided
+		if(empty($password)) {
+			$this->respondWithError(
+				'Authentication Failed: Missing password',
+				SearchSpring_ErrorCodes::AUTH_CREDENTIALS_MISSING,
+				401
+			);
+		}
+
+		// Make sure auth credentials are valid
+		if(!$helper->isSimpleAuthValid()) {
+			$this->respondWithError(
+				'Authentication Failed: Invalid credentials',
+				SearchSpring_ErrorCodes::AUTH_CREDENTIALS_INVALID,
+				401
+			);
+		}
+
+	}
+
+	/**
+	 * Action to forward/redirect/fork to when an unhandled
+	 * exception/error is encountered.
+	 *
+	 * @return void
+	 */
+	public function exceptionAction() {
+
+		// Get Message and Status Code from controller flag
+		$message = $this->getFlag('', 'unhandled-exception-message');
+		$errorCode = $this->getFlag('', 'unhandled-exception-error-code');
+		$responseCode = $this->getFlag('', 'unhandled-exception-http-response-code');
+
+		// Default Message and Code
+		if (!$message) $message = "Unknown Issue";
+		if (!$errorCode) $errorCode = "Unknown Issue";
+		if (!$responseCode) $responseCode = 500;
+
+		// Return all issues as json response
+		$this->setJsonResponse(
+			array(
+				'status' => 'error',
+				'errorCode' => $errorCode,
+				'message' => $message,
+			),
+			$responseCode
+		);
+	}
+
+	/**
+	 * Respond with error, and optional error code / http status codes
+	 *
+	 * @param Exception $e Any exception that needs to be handled
+	 *
+	 * @throws Mage_Core_Controller_Varien_Exception always, to bubble up to parent
+	 */
+	protected function handleException(Exception $e) {
+
+		// If it's already a controller exception, just bubble it up
+		if ($e instanceof Mage_Core_Controller_Varien_Exception) {
+			throw $e;
+		}
+
+		// Convert to controller exception, as unknown, 500
+		$this->respondWithError($e->getMessage());
+	}
+
+	/**
+	 * Respond with error, and optional error code / http status codes
+	 *
+	 * @param string $message The message that should be sent back
+	 * @param int $errorCode The SpringSpring Error Code
+	 * @param int $responseCode The Http response code
+	 *
+	 * @throws Mage_Core_Controller_Varien_Exception always, to bubble up to parent
+	 */
+	protected function respondWithError(
+		$message,
+		$errorCode = SearchSpring_ErrorCodes::UNKNOWN_EXCEPTION,
+		$responseCode = 500
+	) {
+		$controllerException = new Mage_Core_Controller_Varien_Exception;
+		$controllerException->prepareFork('exception');
+		$controllerException->prepareFlag('exception', 'unhandled-exception-message', $message);
+		$controllerException->prepareFlag('exception', 'unhandled-exception-error-code', $errorCode);
+		$controllerException->prepareFlag('exception', 'unhandled-exception-http-response-code', $responseCode);
+		throw $controllerException;
+	}
+
+	/**
+	 * Set appropriate response variables for a json response
+	 *
+	 * @param array $message The message that should be sent back
+	 * @param int $responseCode The Http response code
+	 */
 	private function setJsonResponse(array $message, $responseCode = 200)
 	{
+		// If we are requiring authentication, set the correct header as well
+		if ($responseCode == 401) {
+			$this->getResponse()->setHeader('WWW-Authenticate','Basic realm="SearchSpring Manager"');
+		}
+
 		$this->getResponse()->setHeader('Content-type', 'application/json');
 		$this->getResponse()->setHttpResponseCode($responseCode);
 
-		$responseBody = json_encode($message);
+		$responseBody = Zend_Json::encode($message);
 		$this->getResponse()->setBody($responseBody);
 	}
 
@@ -171,4 +278,5 @@ class SearchSpring_Manager_GenerateController extends Mage_Core_Controller_Front
 		$this->getResponse()->setHttpResponseCode($responseCode);
 		$this->getResponse()->setBody($message);
 	}
+
 }

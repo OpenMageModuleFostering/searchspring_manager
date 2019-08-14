@@ -23,11 +23,11 @@ class SearchSpring_Manager_Service_SearchSpring_ApiAdapter
 	const URL_FORMAT = '%s/%s';
 
 	/**
-	 * The curl adapter
+	 * The http client
 	 *
-	 * @var Varien_Http_Adapter_Curl $curl
+	 * @var Zend_Http_Client
 	 */
-	protected $curl;
+	protected $client;
 
 	/**
 	 * An API error handler if a request fails
@@ -52,11 +52,11 @@ class SearchSpring_Manager_Service_SearchSpring_ApiAdapter
 	 */
 	public function __construct(
 		SearchSpring_Manager_Handler_ApiErrorHandler $errorHandler,
-		Varien_Http_Adapter_Curl $curl,
+		Zend_Http_Client $client,
 		$baseUrl
 	) {
 		$this->errorHandler = $errorHandler;
-		$this->curl = $curl;
+		$this->client = $client;
 		$this->baseUrl = $baseUrl;
 	}
 

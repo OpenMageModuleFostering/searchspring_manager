@@ -56,6 +56,8 @@ class SearchSpring_Manager_Service_SearchSpring_SearchApiAdapter extends SearchS
 	 */
 	private function request($httpMethod, $url, $parameters)
 	{
+
+		// TODO Change this to Zend_Http_Client, parameters shouldn't be a string but an array
 		$this->curl->write($httpMethod, $url . '?' . $parameters, Zend_Http_Client::HTTP_1, array());
 		$response = $this->curl->read();
 
@@ -67,6 +69,7 @@ class SearchSpring_Manager_Service_SearchSpring_SearchApiAdapter extends SearchS
 		}
 
 		return $responseBody;
+
 	}
 
 }

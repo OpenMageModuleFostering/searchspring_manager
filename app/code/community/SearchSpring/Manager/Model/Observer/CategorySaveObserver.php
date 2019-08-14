@@ -22,13 +22,6 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 	private $varienObjectData;
 
 	/**
-	 * Api adapter for connecting to SearchSpring api
-	 *
-	 * @var SearchSpring_Manager_Service_SearchSpring_IndexingApiAdapter $api
-	 */
-	private $api;
-
-	/**
 	 * Create a request body
 	 *
 	 * @var SearchSpring_Manager_Factory_IndexingRequestBodyFactory $requestBodyFactory
@@ -40,8 +33,6 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 	 */
 	public function __construct()
 	{
-		$apiFactory = new SearchSpring_Manager_Factory_ApiFactory();
-		$this->api = $apiFactory->make('index');
 		$this->requestBodyFactory = new SearchSpring_Manager_Factory_IndexingRequestBodyFactory();
 		$this->varienObjectData = new SearchSpring_Manager_VarienObject_Data();
 	}
@@ -82,7 +73,7 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 			SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_CATEGORY,
 			$category->getAllChildren(true)
 		);
-		$this->api->pushIds($requestBody);
+		$this->apiPushProductIds($requestBody);
 
 		return true;
 	}
@@ -117,7 +108,7 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 			$productIds
 		);
 
-		$this->api->pushIds($requestBody);
+		$this->apiPushProductIds($requestBody);
 
 		return true;
 	}
@@ -149,7 +140,7 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 			SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_CATEGORY,
 			$category->getAllChildren(true)
 		);
-		$this->api->pushIds($requestBody);
+		$this->apiPushProductIds($requestBody);
 
 		return true;
 	}
@@ -174,7 +165,7 @@ class SearchSpring_Manager_Model_Observer_CategorySaveObserver extends SearchSpr
 			SearchSpring_Manager_Entity_IndexingRequestBody::TYPE_PRODUCT,
 			$this->getCategoryProductIds($category)
 		);
-		$this->api->pushIds($requestBody);
+		$this->apiPushProductIds($requestBody);
 
 		return true;
 	}

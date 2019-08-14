@@ -14,12 +14,6 @@
  */
 class SearchSpring_Manager_Model_Observer_ProductSaveObserver extends  SearchSpring_Manager_Model_Observer_LiveIndexer
 {
-	/**
-	 * Create an api adapter for SearchSpring
-	 *
-	 * @var SearchSpring_Manager_Service_SearchSpring_IndexingApiAdapter $api
-	 */
-	private $api;
 
 	/**
 	 * Creates a request body
@@ -41,8 +35,6 @@ class SearchSpring_Manager_Model_Observer_ProductSaveObserver extends  SearchSpr
 	 */
 	public function __construct()
 	{
-		$apiFactory = new SearchSpring_Manager_Factory_ApiFactory();
-		$this->api = $apiFactory->make('index');
 		$this->requestBodyFactory = new SearchSpring_Manager_Factory_IndexingRequestBodyFactory();
 	}
 
@@ -74,6 +66,11 @@ class SearchSpring_Manager_Model_Observer_ProductSaveObserver extends  SearchSpr
 	* @return bool
 	*/
 	public function beforeDeletePushProduct(Varien_Event_Observer $productEvent) {
+
+		if (!$this->isEnabled()) {
+			return true;
+		}
+
 		$product = $productEvent->getData('product');
 		$this->_productIds = $this->_getProductIds($product);
 		return true;
@@ -117,7 +114,7 @@ class SearchSpring_Manager_Model_Observer_ProductSaveObserver extends  SearchSpr
 		}
 
 		// send ids to api
-		$this->api->pushIds($requestBody);
+		$this->apiPushProductIds($requestBody);
 
 		return true;
 	}

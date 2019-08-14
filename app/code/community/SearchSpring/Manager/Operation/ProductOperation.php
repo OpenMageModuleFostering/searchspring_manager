@@ -12,14 +12,32 @@
  */
 interface SearchSpring_Manager_Operation_ProductOperation
 {
+
     /**
-     * Perform an operation
+	 * Prepare the collection, before it's loaded.
+	 * This allows for the operation to add filters,
+	 * joins, extra data to the collection before
+	 * it's loaded.
      *
-     * @param Mage_Catalog_Model_Product $product
+     * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      *
      * @return self
      */
-    public function perform(Mage_Catalog_Model_Product $product);
+	public function prepareCollection(Mage_Catalog_Model_Resource_Product_Collection $productCollection);
+
+    /**
+	 * Prepare the operation after the collection has
+	 * been loaded, but before isValid and perform have
+	 * been called. This allows for pulling in data in
+	 * mass, since you have been called ahead of time
+	 * with the products that you will be performing
+	 * operations on.
+     *
+     * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
+     *
+     * @return self
+     */
+	public function prepare(Mage_Catalog_Model_Resource_Product_Collection $productCollection);
 
     /**
      * Checks validity of operation
@@ -31,7 +49,17 @@ interface SearchSpring_Manager_Operation_ProductOperation
     public function isValid(Mage_Catalog_Model_Product $product);
 
     /**
-     * Set records collection to operation
+     * Perform an operation
+     *
+     * @param Mage_Catalog_Model_Product $product
+     *
+     * @return self
+     */
+    public function perform(Mage_Catalog_Model_Product $product);
+
+    /**
+	 * Set records collection to operation. This is the
+	 * collection that output data should be written to.
      *
      * @param SearchSpring_Manager_Entity_RecordsCollection $records
      *

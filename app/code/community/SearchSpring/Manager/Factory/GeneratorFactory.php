@@ -22,6 +22,8 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 	const TYPE_CATEGORY = 'category';
 	/**#@-*/
 
+	const XML_PATH_OPERATION_THIRD_PARTY = 'global/searchspring/operation/third_party';
+
 	/**
 	 * Create a generator
 	 *
@@ -131,6 +133,8 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 		SearchSpring_Manager_Entity_OperationsCollection $operationsCollection,
 		SearchSpring_Manager_Entity_RecordsCollection $productRecords
 	) {
+		$hlp = Mage::helper('searchspring_manager');
+
 		$operationsBuilder->setSanitizer(new SearchSpring_Manager_String_Sanitizer())
 			->setRecords($productRecords)
 			->setClassPrefix(SearchSpring_Manager_Operation_Product::OPERATION_CLASS_PREFIX);
@@ -141,16 +145,26 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 		$operationsCollection->append($operationsBuilder->build('SetOptions'));
 		$operationsCollection->append($operationsBuilder->build('SetCategories'));
 
+		// Parameter for timespan comes from user configuration, by default
+		$operationsCollection->append($operationsBuilder->build('SetReport',
+				array(
+					'timespan' => $hlp->getSalesRankTimespan(),
+				)
+			)
+		);
+
 		// add pricing factory and if we should display zero priced products as additional data
 		$operationsCollection->append($operationsBuilder->build('SetPricing',
 				array(
 					'pricingFactory' => new SearchSpring_Manager_Factory_PricingFactory(),
-					'displayZeroPrice' => (int)Mage::helper('searchspring_manager')->isZeroPriceIndexingEnabled(),
+					'displayZeroPrice' => (int)$hlp->isZeroPriceIndexingEnabled(),
 				)
 			)
 		);
 
 		$operationsCollection->append($operationsBuilder->build('SetRatings'));
+
+		$this->addThirdPartyOperations($operationsCollection, $operationsBuilder);
 
 		// dispatch event allowing additional operations to be added before loop starts
 		$operationsBuilder->setClassPrefix(null);
@@ -183,7 +197,8 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 		$writerParams = new SearchSpring_Manager_Writer_Product_Params_FileWriterParams(
 			$requestParams,
 			$collectionProvider->getCollectionCount(),
-			$filename
+			$filename,
+			Mage::helper('searchspring_manager')->getFeedPath()
 		);
 		$writer = new SearchSpring_Manager_Writer_Product_FileWriter($xmlWriter, $writerParams);
 		$generator = new SearchSpring_Manager_Generator_ProductGenerator($collectionProvider, $writer, $transformer);
@@ -219,4 +234,43 @@ class SearchSpring_Manager_Factory_GeneratorFactory
 
 
 	}
+
+	/**
+	 * Add external/third party operations, these are specified via
+	 * core config. These are based on the existence and status of
+	 * external modules.
+	 *
+	 * @param SearchSpring_Manager_Entity_OperationsCollection $operationsCollection
+	 * @param SearchSpring_Manager_Builder_OperationBuilder $operationsBuilder
+	 */
+	public function addThirdPartyOperations($operationsCollection, $operationsBuilder) {
+
+		$hlp = Mage::helper('searchspring_manager');
+
+		if (Mage::getConfig()->getNode(self::XML_PATH_OPERATION_THIRD_PARTY)) {
+
+			foreach (Mage::getConfig()->getNode(self::XML_PATH_OPERATION_THIRD_PARTY)->children() as $moduleName => $operations) {
+
+				if (!$operations) continue;
+
+				// Make Sure Third Party Module is enabled
+				if (!$hlp->isModuleEnabled($moduleName)) {
+					continue;
+				}
+
+				// Each Third Party Module Mentioned can have multiple operations
+				foreach($operations->children() as $operationKey => $operationInfo) {
+
+					// TODO - Maybe allow an operation to be disabled as a config within $operationInfo
+					// TODO - Maybe allow an parameters to be passed to operation via $operationInfo
+					$params = array();
+
+					// Create Operation and Append to Collection
+					$operationsCollection->append($operationsBuilder->build((string)$operationInfo->class, $params, false));
+
+				}
+			}
+		}
+	}
+
 }

@@ -115,6 +115,10 @@ class SearchSpring_Manager_Entity_RecordsCollection
 	 */
 	public function add($key, $element)
 	{
+		if(isset($this->fields[$this->key()][$key]) && !is_array($this->fields[$this->key()][$key])) {
+			$this->fields[$this->key()][$key] = array($this->fields[$this->key()][$key]);
+		}
+
 		$this->fields[$this->key()][$key][] = $element;
 
 		return $this;

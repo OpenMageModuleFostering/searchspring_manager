@@ -18,16 +18,16 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
      * Feed Constants
      */
     const FEED_CATEGORY_HIERARCHY = 'category_hierarchy';
-    const FEED_CATEGORY_NAME = 'category_name';
+    const FEED_CATEGORY_NAME = 'category';
 	const FEED_CATEGORY_IDS = 'category_ids';
     /**#@-*/
 
 	/**
-	 * Category names we should skip
+	 * Loaded category model cache
 	 *
-	 * @var array
+     * @var Mage_Catalog_Model_Category[]
 	 */
-	private $skipCategories = array('Root Catalog', 'Default Category', null);
+	protected $_categoryCache = array();
 
     /**
      * Sets category data to feed
@@ -48,14 +48,14 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
         /** @var Mage_Catalog_Model_Category $category */
         foreach($product->getCategoryIds() as $categoryId) {
             // load category data
-            $category = Mage::getModel('catalog/category')->load($categoryId);
+            $category = $this->_getCategory($categoryId);
 
             if (!$category->getData('is_active')) {
                 continue;
             }
 
-            $categoryName = $category->getData('name');
-            if (in_array($categoryName, $this->skipCategories)) {
+            // Skip this store's root category
+            if ($this->_isRoot($category)) {
                 continue;
             }
 
@@ -69,7 +69,7 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
                 $categoryHierarchies[] = $value;
             }
 
-            $categoryNames[] = $categoryName;
+            $categoryNames[] = $category->getName();
         }
 
         $categoryHierarchies = array_unique($categoryHierarchies);
@@ -110,16 +110,32 @@ class SearchSpring_Manager_Operation_Product_SetCategories extends SearchSpring_
         $hierarchy = array();
         $currentHierarchy = array();
         foreach ($categoryPath as $categoryId) {
-            $category = Mage::getModel('catalog/category')->load($categoryId);
+            $category = $this->_getCategory($categoryId);
 
-            $categoryName = $category->getData('name');
-            if (in_array($categoryName, $this->skipCategories)) {
+            // Skip this store's root category
+            if ($this->_isRoot($category)) {
                 continue;
-            }
-            $currentHierarchy[] = $categoryName;
+             }
+
+            $currentHierarchy[] = $category->getName();
             $hierarchy[] = implode('/', $currentHierarchy);
         }
 
         return $hierarchy;
     }
+
+	protected function _getCategory($categoryId) {
+		if (!isset($this->_categoryCache[$categoryId])) {
+			$this->_categoryCache[$categoryId] = Mage::getModel('catalog/category')->load($categoryId);
+		}
+		return $this->_categoryCache[$categoryId];
+	}
+
+	protected function _isRoot($category) {
+		return (
+			0 === (int)$category->getLevel() ||
+			1 === (int)$category->getLevel()
+		);
+	}
+
 }

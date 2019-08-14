@@ -78,12 +78,14 @@ class SearchSpring_Manager_Entity_IndexingRequestBody extends SearchSpring_Manag
 	 */
 	public function jsonSerialize()
 	{
+        $url = Mage::helper('searchspring_manager')->getMageAPIUrlProduct();
+
 		$body = array(
 			'type' => $this->type,
 			'ids' => $this->ids,
 			'delete' => $this->shouldDelete,
 			'feedId' => $this->feedId,
-			'generateUrl' => Mage::getUrl('searchspring/generate/index',array('_secure'=>true))
+			'generateUrl' => $url
 		);
 
 		return $body;

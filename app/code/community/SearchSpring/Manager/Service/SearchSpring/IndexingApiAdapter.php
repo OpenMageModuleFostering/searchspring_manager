@@ -49,14 +49,15 @@ class SearchSpring_Manager_Service_SearchSpring_IndexingApiAdapter extends Searc
 	 */
 	private function request($httpMethod, $url, $body)
 	{
-		$this->curl->write($httpMethod, $url, Zend_Http_Client::HTTP_1, array(), $body);
-		$response = $this->curl->read();
-		$responseCode = Zend_Http_Response::extractCode($response);
-		$this->curl->close();
+		$this->client->setUri($url);
+		$this->client->setRawData($body, 'application/json');
+		$response = $this->client->request($httpMethod);
 
-		if ($this->errorHandler->shouldRetry($response)) {
-			$this->request($httpMethod, $url, $body);
+		while($this->errorHandler->shouldRetry($response)) {
+			$response = $this->client->request($httpMethod);
 		}
+
+		$responseCode = $response->getStatus();
 
 		return $responseCode;
 	}

@@ -1,0 +1,186 @@
+<div class="section-config active ss-login">
+	<input id="searchspring_new_connection_fl" name="searchspring_new_connection_fl" type="hidden" value="0"/>
+	<div class="entry-edit-head ">
+		<a>SearchSpring Connection</a>
+	</div>
+	<fieldset class="ss-login-connected config collapseable" id="ssmanager_ssmanager_setup">
+		<legend>SearchSpring Connection</legend>
+		<table cellspacing="0" class="form-list">
+			<colgroup class="label"></colgroup>
+			<colgroup class="value"></colgroup>
+			<colgroup class="scope-label"></colgroup>
+			<colgroup class=""></colgroup>
+			<tbody>
+			<tr id="row_ssmanager_ssmanager_setup_connection" class="ss-step1">
+				<td class="label">
+					<label for="ssmanager_ssmanager_setup_connection">Connection</label>
+				</td>
+				<td class="value">
+					<div class="ss-connect-message">Connected</div>
+					<button id="ss-reconnect-button" title="Re-connect" type="button" class="scalable" style=""><span><span><span>Reset Connection</span></span></span></button>
+				</td>
+				<td class="scope-label"></td>
+				<td class=""></td>
+			</tr>
+			</tbody>
+		</table>
+	</fieldset>
+	<fieldset class="ss-login-not_connected config collapseable" id="ssmanager_ssmanager_setup">
+		<legend>SearchSpring Connection</legend>
+		<table cellspacing="0" class="form-list">
+			<colgroup class="label"></colgroup>
+			<colgroup class="value"></colgroup>
+			<colgroup></colgroup>
+			<tbody>
+			<tr>
+				<td class="ss-has-account-header" colspan="2">Have a SearchSpring Account?</td>
+				<td class="ss-no-account-header ss-no-account">Don't have a SearchSpring Account yet?</td>
+			</tr>
+			<tr id="row_ssmanager_ssmanager_setup_username" class="ss-step1">
+				<td class="label">
+					<label for="ssmanager_ssmanager_setup_username">SearchSpring Username</label>
+				</td>
+				<td class="value">
+					<input id="ssmanager_ssmanager_setup_username" tabindex="1" name="groups[ssmanager_setup][fields][username][value]" class=" input-text" type="text">
+				</td>
+				<td class="ss-no-account" rowspan="3">
+					<a href="http://www.searchspring.com/request-a-demo">
+						<button id="ss-demo-button" title="Request A Demo" type="button" class="scalable" style=""><span><span><span>Request A Demo</span></span></span></button>
+					</a>
+				</td>
+			</tr>
+			<tr id="row_ssmanager_ssmanager_setup_password" class="ss-step1">
+				<td class="label"><label for="ssmanager_ssmanager_setup_password">SearchSpring Password</label></td>
+				<td class="value">
+					<input id="ssmanager_ssmanager_setup_password" tabindex="2" name="groups[ssmanager_setup][fields][password][value]" class=" input-text" type="password">
+				</td>
+				<td class="scope-label"></td>
+				<td class=""></td>
+			</tr>
+			<tr id="row_ssmanager_ssmanager_setup_authentication_method" class="ss-step1">
+				<td class="label"><label for="ssmanager_ssmanager_setup_authentication_method">Authenticaion Method</label></td>
+				<td class="value">
+					<select id="ssmanager_ssmanager_setup_authentication_method" tabindex="2" name="groups[ssmanager_setup][fields][authentication_method][value]" class=" input-text">
+						<option value="simple">Simple Authentication</option>
+						<option value="oauth">OAuth API</option>
+					</select>
+					<p class="note">If you're not sure your Magento install supports OAuth API use Simple Authentication</p>
+				</td>
+				<td class="scope-label"></td>
+				<td class=""></td>
+			</tr>
+			<tr id="row_ssmanager_ssmanager_setup_login" class="ss-step1">
+				<td class="label"></td>
+				<td class="value">
+					<button id="ss-login-button" title="Login" type="button" class="scalable" style=""><span><span><span>Login</span></span></span></button>
+				</td>
+				<td></td>
+			</tr>
+			<tr id="row_ssmanager_ssmanager_setup_website" class="ss-step2">
+				<td class="label">
+					<label for="ssmanager_ssmanager_setup_website">Website</label>
+				</td>
+				<td class="value">
+					<select disabled id="ssmanager_ssmanager_setup_website" name="groups[ssmanager_setup][fields][website][value]" class=" select"></select>
+				</td>
+				<td class="ss-no-account" rowspan="3">
+					<a href="http://www.searchspring.com/request-a-demo">
+						<button id="ss-demo-button" title="Request A Demo" type="button" class="scalable" style=""><span><span><span>Request A Demo</span></span></span></button>
+					</a>
+				</td>
+			</tr>
+			<tr id="row_ssmanager_ssmanager_setup_feed" class="ss-step2">
+				<td class="label">
+					<label for="ssmanager_ssmanager_setup_feed">Feed</label>
+				</td>
+				<td class="value">
+					<select disabled id="ssmanager_ssmanager_setup_feed" name="groups[ssmanager_setup][fields][feed][value]" class=" select"></select>
+				</td>
+				<td></td>
+			</tr>
+			<tr id="row_ssmanager_ssmanager_setup_connect" class="ss-step2">
+				<td class="label"></td>
+				<td class="value">
+					<button disabled id="ss-connect-button" title="Connect" type="button" class="scalable disabled" style=""><span><span><span>Connect</span></span></span></button>
+				</td>
+				<td></td>
+			</tr>
+			</tbody>
+		</table>
+	</fieldset>
+</div>
+
+<div id="ss-confirm-connect">
+	<h2>SearchSpring OAuth</h2>
+	<p class="ss-disclaimer">
+		In order to keep your data secure SearchSpring will now create a Magento API User, Role and Consumer and send
+		the API information to SearchSpring.
+	</p>
+	<p class="ss-details">
+		SearchSpring prides itself in keeping your data safe. We use OAuth to secure your data. This way only
+		SearchSpring can access your product data. The API User and Role created only have access to the SearchSpring
+		created endpoints to access your data.
+	</p>
+	<div class="ss-buttons">
+		<button id="ss-cancel-button" title="Cancel" type="button" class="scalable back" style=""><span><span><span>Cancel</span></span></span></button>
+		<button id="ss-confirm-button" title="OK" type="button" class="scalable save" style=""><span><span><span>Connect</span></span></span></button>
+	</div>
+</div>
+
+<style type="text/css">
+<?php if(!$this->isSetup()): ?>
+	.section-config .ss-login-connected { display: none; }
+<?php else: ?>
+	.section-config .ss-login-not_connected { display: none; }
+<?php endif; ?>
+	.ss-connect-message { font-weight: bold; color: #007700;}
+	.section-config.ss-login .entry-edit-head a { text-decoration: none; }
+	.ss-step2 { display: none; }
+	.ss-has-account-header { color: #007700; font-weight: bold; text-align: center; width: 50%;}
+	.ss-no-account-header { color: #770000; font-weight: bold; width: 50%;}
+	.ss-no-account { border-left: 1px solid #CCC; padding-left: 15px; text-align: center;}
+	#ss-demo-button { padding: 5px 15px; margin-top: 15px;}
+
+	#ss-confirm-connect {
+		display: none;
+		position:absolute;
+		top:200px;
+		left:50%;
+		width:400px;  /* adjust as per your needs */
+		height:180px;   /* adjust as per your needs */
+		margin-left:-200px;   /* negative half of width above */
+		border: 1px solid #d6d6d6;
+		background-color: #fafafa;
+		z-index: 999;
+		padding: 10px;
+		-webkit-box-shadow: 3px 3px 5px 0px rgba(61,61,61,.2);
+		-moz-box-shadow: 3px 3px 5px 0px rgba(61,61,61,.2);
+		box-shadow: 3px 3px 5px 0px rgba(61,61,61,.2);
+	}
+
+	#ss-confirm-connect h2 {
+		text-align: center;
+		font-size: 16px;
+	}
+
+	#ss-confirm-connect .ss-disclaimer {
+		font-weight: bold;
+	}
+
+	#ss-confirm-connect .ss-details {
+		margin-top: 10px;
+		font-size: 10px;
+		color: #777;
+	}
+
+	#ss-cancel-button span {
+		padding: 0;
+		background-image: none;
+	}
+
+	#ss-confirm-connect .ss-buttons {
+		margin-top: 10px;
+		text-align: center;
+	}
+</style>
+

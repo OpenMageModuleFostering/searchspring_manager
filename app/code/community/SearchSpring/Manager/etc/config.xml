@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<SearchSpring_Manager>
-			<version>1.1.0</version>
+			<version>1.10.0</version>
 		</SearchSpring_Manager>
 	</modules>
 	<global>
@@ -28,14 +28,15 @@
 			</searchspring_manager>
 		</helpers>
 		<events>
-			<catalog_product_save_after>
+			<!-- use catalog_product_save_commit_after otherwise we can get stale product data if our request runs before commit -->
+			<catalog_product_save_commit_after>
 				<observers>
 					<searchspring_manager_after_save_push_product>
 						<class>searchspring_manager/observer_productSaveObserver</class>
 						<method>afterSavePushProduct</method>
 					</searchspring_manager_after_save_push_product>
 				</observers>
-			</catalog_product_save_after>
+			</catalog_product_save_commit_after>
 			<catalog_product_delete_before>
 				<observers>
 					<searchspring_manager_before_delete_push_product>
@@ -52,14 +53,14 @@
 					</searchspring_manager_after_delete_push_product>
 				</observers>
 			</catalog_product_delete_after_done>
-			<catalog_category_save_after>
+			<catalog_category_save_commit_after>
 				<observers>
 					<searchspring_manager_after_save_update_product_category>
 						<class>searchspring_manager/observer_categorySaveObserver</class>
 						<method>afterSaveUpdateProductCategory</method>
 					</searchspring_manager_after_save_update_product_category>
 				</observers>
-			</catalog_category_save_after>
+			</catalog_category_save_commit_after>
 			<category_move>
 				<observers>
 					<searchspring_manager_after_move_update_product_category>
@@ -98,13 +99,40 @@
 			<searchspring_manager>
 				<setup>
 					<module>SearchSpring_Manager</module>
-					<class>Mage_Catalog_Model_Resource_Setup</class>
 				</setup>
 				<connection>
 					<use>core_setup</use>
 				</connection>
 			</searchspring_manager>
 		</resources>
+		<searchspring>
+			<api_host>https://api-beta.searchspring.net</api_host>
+			<!--<api_host>http://23.23.23.2</api_host>-->
+			<api_auth>
+				<consumer>
+					<label>SearchSpring</label>
+				</consumer>
+				<role>
+					<label>SearchSpring</label>
+				</role>
+				<admin_user>
+					<username>searchspring_api</username>
+					<firstname>SearchSpring</firstname>
+					<lastname>SearchSpring</lastname>
+					<email>dev+magentoapi@searchspring.com</email>
+				</admin_user>
+			</api_auth>
+		</searchspring>
+		<api2>
+			<auth_adapters>
+				<oauth_zero_legged>
+					<model>searchspring_manager/api2_auth_adapter</model>
+					<label>oAuth Zero Legged</label>
+					<enabled>1</enabled>
+					<order>5</order>
+				</oauth_zero_legged>
+			</auth_adapters>
+		</api2>
 	</global>
 	<frontend>
 		<routers>
@@ -125,6 +153,18 @@
 		<!-- 	</updates> -->
 		<!-- </layout> -->
 	</frontend>
+	<adminhtml>
+		<events>
+			<admin_system_config_changed_section_ssmanager>
+				<observers>
+					<searchspring_manager_after_config_section_changed>
+						<class>searchspring_manager/observer_configObserver</class>
+						<method>afterSystemConfigSectionChanged</method>
+					</searchspring_manager_after_config_section_changed>
+				</observers>
+			</admin_system_config_changed_section_ssmanager>
+		</events>
+	</adminhtml>
 	<default>
 		<ssmanager>
 			<ssmanager_general>
@@ -133,6 +173,43 @@
 			<ssmanager_catalog>
 				<enable_categories>0</enable_categories>
 			</ssmanager_catalog>
+			<ssmanager_images>
+				<generate_cache_images>1</generate_cache_images>
+			</ssmanager_images>
+			<ssmanager_feed>
+				<feed_path>media/searchspring/feed/</feed_path>
+			</ssmanager_feed>
+			<ssmanager_sales_rank>
+				<timespan>6,month</timespan>
+			</ssmanager_sales_rank>
+			<ssmanager_api>
+				<authentication_method>simple</authentication_method>
+			</ssmanager_api>
 		</ssmanager>
 	</default>
+
+	<global>
+		<searchspring>
+			<operation>
+				<third_party>
+
+					<!-- Feed Operations for Third Party Modules -->
+
+					<TBT_Rewards>
+						<loyalty>
+							<class>SearchSpring_Manager_ThirdParty_TBT_RewardsOperation</class>
+						</loyalty>
+					</TBT_Rewards>
+
+					<Amasty_Label>
+						<labels>
+							<class>SearchSpring_Manager_ThirdParty_Amasty_LabelsOperation</class>
+						</labels>
+					</Amasty_Label>
+
+				</third_party>
+			</operation>
+		</searchspring>
+	</global>
+
 </config>

@@ -59,9 +59,17 @@ class SearchSpring_Manager_Generator_ProductGenerator
      */
     public function generate()
     {
+		Varien_Profiler::start(__METHOD__.": getCollection()");
         $productCollection = $this->collectionProvider->getCollection();
+		Varien_Profiler::stop(__METHOD__.": getCollection()");
+
+		Varien_Profiler::start(__METHOD__.": transform()");
         $recordCollection = $this->transformer->transform($productCollection);
+		Varien_Profiler::stop(__METHOD__.": transform()");
+
+		Varien_Profiler::start(__METHOD__.": write()");
         $resultMessage = $this->writer->write($recordCollection);
+		Varien_Profiler::stop(__METHOD__.": write()");
 
         return $resultMessage;
     }

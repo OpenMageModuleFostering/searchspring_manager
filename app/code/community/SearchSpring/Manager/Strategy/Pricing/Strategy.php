@@ -183,7 +183,6 @@ abstract class SearchSpring_Manager_Strategy_Pricing_Strategy implements SearchS
 	private function formatPrice($price)
 	{
 		$price = (double)$price;
-		$price = (double)number_format($price, 2);
 
 		return $price;
 	}

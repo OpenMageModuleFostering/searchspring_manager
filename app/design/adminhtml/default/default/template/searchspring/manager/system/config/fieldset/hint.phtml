@@ -1,0 +1,77 @@
+<script type="text/javascript">
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	ga('create', 'UA-90531-3', 'auto');
+	ga('send', 'event', 'Magento', 'Load Settings Web', '<?php echo $_SERVER['HTTP_HOST'] ?>');
+</script>
+
+<div class="searchspring-hint">
+	<a onClick="ga('send', 'event', 'Magento', 'Click Logo', '<?php echo $_SERVER['HTTP_HOST'] ?>')" class="searchspring-logo" href="http://www.searchspring.com"><img src="//cdn.searchspring.net/magento/logo.png" /></a>
+
+	<div class="main-text">
+		<?php if($this->isSetup()): ?>
+			<h3>Thanks!</h3>
+			<p>
+				<strong>It looks like you're all setup.</strong> If you need any questions or concerns please contact
+				<a onClick="ga('send', 'event', 'Magento', 'Click Support', '<?php echo $_SERVER['HTTP_HOST'] ?>')" target="_new" href="https://searchspring.zendesk.com/hc/en-us/requests/new">SearchSpring Support</a>.
+				We're here to help.
+			</p>
+		<?php else: ?>
+			<h3>Welcome!</h3>
+			<p>
+				<strong>It looks like you're not setup yet.</strong> If you're not a SearchSpring customer yet you can
+				<a onClick="ga('send', 'event', 'Magento', 'Request Demo', '<?php echo $_SERVER['HTTP_HOST'] ?>')" target="_new" href="http://www.searchspring.com/request-a-demo">request a demo</a>. If
+				you need help with setup please contact <a onClick="ga('send', 'event', 'Magento', 'Click Support', '<?php echo $_SERVER['HTTP_HOST'] ?>')" target="_new" href="https://searchspring.zendesk.com/hc/en-us/requests/new">SearchSpring Support</a>.
+			</p>
+		<?php endif; ?>
+		<p>This module links your Magento store to your SearchSpring account. This allows us to update your SearchSpring Search & Navigation in near real-time.</p>
+	</div>
+
+	<div class="bottom-links">
+		<a onClick="ga('send', 'event', 'Magento', 'Click Support', '<?php echo $_SERVER['HTTP_HOST'] ?>')" href="https://searchspring.zendesk.com/hc/en-us/requests/new" target="_new">SearchSpring Support</a> |
+		<a onClick="ga('send', 'event', 'Magento', 'Click Knowledge Base', '<?php echo $_SERVER['HTTP_HOST'] ?>')" href="https://searchspring.zendesk.com/hc/en-us/categories/200117639-Knowledge-Base" target="_new">Knowledge Base</a>
+		<span class="version">
+			v<?php echo $this->getVersion() ?>
+		</span>
+	</div>
+
+	<div style="clear:both"></div>
+</div>
+
+
+<style type="text/css">
+	.searchspring-hint {
+		margin: 5px 0;
+		padding: 5px 8px;
+		background-color: #e6eef0;
+		border:1px solid #cadcdc;
+		position: relative;
+	}
+
+	.searchspring-logo {
+		float: left;
+		margin-right: 15px;
+	}
+
+	.bottom-links {
+		position: absolute;
+		bottom: 5px;
+		right: 8px;
+	}
+
+	.main-text {
+		margin: 15px 0;
+	}
+
+	.main-text h3 {
+		color: #01214f;
+	}
+
+	.version {
+		color: #999999;
+		margin-left: 20px;
+	}
+</style>

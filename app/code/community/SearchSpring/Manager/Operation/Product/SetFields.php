@@ -24,32 +24,17 @@ class SearchSpring_Manager_Operation_Product_SetFields extends SearchSpring_Mana
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
         foreach($product->getAttributes() as $key => $attribute) {
-            $this->getRecords()->set($key, $this->getAttributeValue($product, $attribute));
+			$value = $this->getAttributeValue($product, $attribute);
+			if (is_array($value)) {
+				foreach($value as $v) {
+					$this->getRecords()->add($key, $v);
+				}
+			} else if ($value !== false) {
+				$this->getRecords()->set($key, $value);
+			}
         }
 
         return $this;
-    }
-
-    /**
-     * If product is not enabled or visible, set invalid
-     *
-     * @param Mage_Catalog_Model_Product $product
-     *
-     * @return bool
-     */
-    public function isValid(Mage_Catalog_Model_Product $product)
-    {
-        // product must be enabled
-        if ((int)$product->getData('status') !== Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            return false;
-        }
-
-        // product must be visible in catalog and search
-        if ((int)$product->getData('visibility') !== Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -62,15 +47,18 @@ class SearchSpring_Manager_Operation_Product_SetFields extends SearchSpring_Mana
      */
 	private function getAttributeValue(Mage_Catalog_Model_Product $product, Mage_Eav_Model_Entity_Attribute $attribute)
 	{
-		$attributeValue = $attribute->getFrontend()->getValue($product);
-		$returnValue = null;
+		$attributeValue = Mage::helper('searchspring_manager/product')->getAttributeText($product, $attribute);
 
 		if (is_array($attributeValue)) {
+			$returnValue = null;
 			foreach ($attributeValue as $v) {
 				$returnValue[] = json_encode($v);
 			}
-		} else {
+		} else if ($attributeValue !== false && $attributeValue !== null) {
 			$returnValue = $this->getSanitizer()->sanitizeForRequest($attributeValue);
+		} else {
+			// This means there should be no value for this attribute
+			$returnValue = false;
 		}
 
 		return $returnValue;

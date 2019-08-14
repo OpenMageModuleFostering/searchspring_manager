@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<config>
+    <api2>
+        <resource_groups>
+            <searchspring translate="title" module="searchspring_manager">
+                <title>SearchSpring Indexing</title>
+                <sort_order>10</sort_order>
+            </searchspring>
+        </resource_groups>
+        <resources>
+            <searchspring translate="title" module="searchspring_manager">
+                <group>searchspring</group>
+                <model>searchspring_manager/api2_indexing</model>
+                <title>SearchSpring Indexing</title>
+                <sort_order>10</sort_order>
+                <privileges>
+                    <admin>
+                        <!-- We don't actually need these all yet, but in case we do let's set them up for permissions -->
+                        <create>1</create>
+                        <retrieve>1</retrieve>
+                        <update>1</update>
+                        <delete>1</delete>
+                    </admin>
+                </privileges>
+                <attributes>
+                    <type>Request Type</type>
+                    <ids>Request Ids</ids>
+                    <size>Request Size</size>
+                    <start>Request Start</start>
+                    <count>Request Feed Count</count>
+                    <filename>Feed Filename</filename>
+                    <store>Store</store>
+                </attributes>
+                <force_attributes>
+                	<admin>
+                    	<type>Request Type</type>
+                    	<ids>Request Ids</ids>
+                    	<size>Request Size</size>
+                    	<start>Request Start</start>
+                    	<count>Request Feed Count</count>
+                    	<filename>Feed Filename</filename>
+                    	<store>Store</store>
+					</admin>
+				</force_attributes>
+                <routes>
+                    <route_feed>
+                        <route>/searchspring/feed</route>
+                        <action_type>entity</action_type>
+                    </route_feed>
+                    <route_index>
+                        <route>/searchspring/index</route>
+                        <action_type>collection</action_type>
+                    </route_index>
+                </routes>
+                <versions>1</versions>
+            </searchspring>
+        </resources>
+    </api2>
+</config>
