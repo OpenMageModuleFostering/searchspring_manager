@@ -33,8 +33,11 @@ class SearchSpring_Manager_Helper_Catalog_Image extends Mage_Catalog_Helper_Imag
 	// Overriding this, so we're not calling set base file on our image model initially
 	public function init(Mage_Catalog_Model_Product $product, $attributeName, $imageFile=null)
 	{
-		$attributeValue = $product->getData($attributeName);
-		return parent::init($product, $attributeName, $attributeValue);
+		if(is_null($imageFile)) {
+			$imageFile = $product->getData($attributeName);
+		}
+
+		return parent::init($product, $attributeName, $imageFile);
 	}
 
 	public function ifCachedGetUrl()
