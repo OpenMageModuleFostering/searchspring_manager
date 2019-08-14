@@ -78,19 +78,31 @@ class SearchSpring_Manager_Block_Adminhtml_System_Config_Fieldset_Setup extends 
 		return false;
 	}
 
+	public function isModuleEnabled($moduleName) {
+		$hlp = Mage::helper('searchspring_manager');
+		return $hlp->isModuleEnabled($moduleName);
+	}
+
 	public function isSetup($store = null) {
 		$hlp = Mage::helper('searchspring_manager');
+		$isSetup = false;
 
-		// If no store was passed
-		if (!$store) {
-			if (!$this->isInStoreScope()) {
-				// If we're not in the store scope
-				return $this->isAnyStoreSetup();
+		try {
+			// If no store was passed
+			if (!$store) {
+				if (!$this->isInStoreScope()) {
+					// If we're not in the store scope
+					return $this->isAnyStoreSetup();
+				}
+				$store = $this->_configModel->getStore();
 			}
-			$store = $this->_configModel->getStore();
+
+			$isSetup = $hlp->isStoreSetup($store) && $hlp->verifySetupWithSearchSpring($store);
+		} catch (Exception $e) {
+			// TODO: figure out better way to report this to the user
 		}
 
-		return $hlp->isStoreSetup($store) && $hlp->verifySetupWithSearchSpring($store);
+		return $isSetup;
 	}
 
 	public function isInDefaultScope() {
@@ -188,4 +200,24 @@ class SearchSpring_Manager_Block_Adminhtml_System_Config_Fieldset_Setup extends 
 			'store' => $store->getCode())
 		);
 	}
+
+	public function getAuthMethods() {
+		$oahlp = Mage::helper('searchspring_manager/oauth');
+		$methods = array(
+			array(
+				'value' => 'simple',
+				'label' => 'Simple Authentication'
+			)
+		);
+
+		if ($oahlp->isSupported()) {
+			$methods[] = array(
+				'value' => 'oauth',
+				'label' => 'OAuth API'
+			);
+		}
+
+		return $methods;
+	}
+
 }

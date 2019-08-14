@@ -25,6 +25,10 @@ class SearchSpring_Manager_Helper_Oauth extends Mage_Core_Helper_Abstract
 		return Mage::helper('searchspring_manager');
 	}
 
+	public function isSupported() {
+		return $this->hlp()->isModuleEnabled('Mage_Oauth') && $this->hlp()->isModuleEnabled('Mage_Api3');
+	}
+
 	public function getAdminUser() {
 		if (is_null($this->_adminUser)) {
 			$model = Mage::getModel('admin/user')->load($this->getAdminUserId());
@@ -37,6 +41,7 @@ class SearchSpring_Manager_Helper_Oauth extends Mage_Core_Helper_Abstract
 
 	public function getAdminUserRole() {
 		if (is_null($this->_adminUserRole)) {
+			$this->hlp()->ensureModelExists('api2/acl_global_role');
 			$model = Mage::getModel('api2/acl_global_role')->load($this->getAdminUserRoleId());
 			if (!$model->getId()) $model = false;
 			$this->_adminUserRole = $model;
@@ -47,6 +52,7 @@ class SearchSpring_Manager_Helper_Oauth extends Mage_Core_Helper_Abstract
 
 	public function getConsumer() {
 		if (is_null($this->_consumer)) {
+			$this->hlp()->ensureModelExists('oauth/consumer');
 			$model = Mage::getModel('oauth/consumer')->load($this->getConsumerId());
 			if (!$model->getId()) $model = false;
 			$this->_consumer = $model;
@@ -144,6 +150,8 @@ class SearchSpring_Manager_Helper_Oauth extends Mage_Core_Helper_Abstract
 
 	protected function _createRole($userId) {
 		$name = Mage::getConfig()->getNode('global/searchspring/api_auth/role/label');
+
+		$this->hlp()->ensureModelExists('api2/acl_global_role');
 
 		$role = Mage::getModel('api2/acl_global_role');
 		$role->setRoleName($name);

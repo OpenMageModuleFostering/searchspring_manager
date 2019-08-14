@@ -144,6 +144,17 @@ class SearchSpring_Manager_Helper_Data extends Mage_Core_Helper_Abstract
 		return true;
 	}
 
+	public function ensureModelExists($model) {
+		$className = Mage::getConfig()->getModelClassName($model);
+		Mage::log('Something here');
+
+		if (!class_exists($className, false)) {
+			throw new Exception('The model ' . $model . ' does not exist!');
+		}
+
+		return true;
+	}
+
 	/**
 	 * Forwarded Config Getters
 	 */

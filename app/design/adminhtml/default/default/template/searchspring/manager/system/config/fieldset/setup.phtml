@@ -61,10 +61,10 @@
 				<td class="label"><label for="ssmanager_ssmanager_setup_authentication_method">Authentication Method</label></td>
 				<td class="value">
 					<select id="ssmanager_ssmanager_setup_authentication_method" tabindex="2" class=" input-text">
-						<option value="simple">Simple Authentication</option>
-						<option value="oauth">OAuth API</option>
+						<?php foreach ($this->getAuthMethods() as $method): ?>
+							<option value="<?= $method['value'] ?>"><?= $method['label'] ?></option>
+						<?php endforeach; ?>
 					</select>
-					<p class="note">If you're not sure your Magento install supports OAuth API use Simple Authentication</p>
 				</td>
 				<td class="scope-label"></td>
 				<td class=""></td>
