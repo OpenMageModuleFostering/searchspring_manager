@@ -51,7 +51,7 @@
 					<fields>
                         <live_indexing translate="label">
                             <label>Live Indexing</label>
-                            <comment>If live indexing is enabled, on product/category saves, SearchSpring will get an update of changes.  Only enable this if Magento cache is updated on save.</comment>
+							<comment>When a product or category is saved/deleted from the Magento Admin Panel, Live Indexing will update affected products on the SearchSpring side.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>5</sort_order>
