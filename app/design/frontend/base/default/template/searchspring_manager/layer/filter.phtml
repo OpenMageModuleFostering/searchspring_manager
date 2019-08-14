@@ -1,0 +1,20 @@
+<?php
+/**
+ * Template for filter items block
+ *
+ * @see SearchSpring_Manager_Block_Layer_Filter_SearchSpringList
+ */
+?>
+
+<ol>
+	<?php foreach ($this->getItems() as $_item): ?>
+		<li <?php echo $_item->isActive()?'class="active"':'' ?>>
+			<a rel="nofollow" href="<?php echo $this->urlEscape($_item->getUrl()) ?>">
+				<?php echo $_item->getLabel() ?>
+				<?php if ($this->shouldDisplayProductCount()): ?>
+					<span class="count">(<?php echo $_item->getCount() ?>)</span>
+				<?php endif; ?>
+			</a>
+		</li>
+	<?php endforeach ?>
+</ol>

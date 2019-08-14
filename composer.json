@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/SearchSpring_Manager",
+    "type": "magento-module",
+    "license": "SearchSpring-Terms-of-Service",
+    "homepage": "",
+    "description": "Connects your Magento store to SearchSpring's subscription-based site search and category navigation services.",
+    "authors": [
+    {
+        "name": "SearchSpring Development Team",
+        "email": "info@searchspring.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

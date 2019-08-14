@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<config>
+	<tabs>
+		<searchspring translate="label" module="searchspring_manager">
+			<label>SearchSpring</label>
+			<sort_order>500</sort_order>
+		</searchspring>
+	</tabs>
+	<sections>
+		<ssmanager translate="label">
+			<label>Manager Settings</label>
+			<tab>searchspring</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>100</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<ssmanager_general translate="label" module="searchspring_manager">
+					<label>Indexing Configuration</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>100</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+                        <live_indexing translate="label">
+                            <label>Live Indexing</label>
+                            <comment>If live indexing is enabled, on product/category saves, SearchSpring will get an update of changes.  Only enable this if Magento cache is updated on save.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </live_indexing>
+						<index_zero_price translate="label">
+							<label>Display products with 0 price</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</index_zero_price>
+					</fields>
+				</ssmanager_general>
+                <ssmanager_images translate="label" module="searchspring_manager">
+                    <label>Image Settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>100</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <generate_cache_images translate="label">
+                            <label>Generate Cache Images</label>
+                            <comment>If you use cache images and clear your image cache you will need to re-index SearchSpring to re-populate your product images.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </generate_cache_images>
+                        <image_width translate="label">
+                            <label>Image Width</label>
+                            <comment>Image width in pixels for generated cache images (Default: 200)</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </image_width>
+                        <image_height translate="label">
+                            <label>Image Height</label>
+                            <comment>Image height in pixels for generated cache images (Default: 200)</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </image_height>
+                    </fields>
+                </ssmanager_images>
+                <ssmanager_catalog translate="label" module="searchspring_manager">
+                    <label>Catalog Configuration</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>200</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enable_categories translate="label">
+                            <label>Category Display</label>
+                            <comment>If category display is enabled SearchSpring will power your category pages.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+							<!-- Turn these back on for Category Page Management -->
+                            <show_in_default>0</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enable_categories>
+                    </fields>
+                </ssmanager_catalog>
+				<ssmanager_api translate="label" module="searchspring_manager">
+					<label>SearchSpring Connection Settings</label>
+					<frontend_type>select</frontend_type>
+					<sort_order>300</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<base_url translate="label">
+							<label>Base URL</label>
+							<comment>https://example.com</comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>15</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</base_url>
+						<site_id translate="label">
+							<label>Site ID</label>
+							<comment>You can find this in the upper right corner of the SearchSpring Management Console</comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</site_id>
+						<feed_id translate="label">
+							<label>Feed ID</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>30</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</feed_id>
+						<secret_key translate="label">
+							<label>Secret Key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>40</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</secret_key>
+					</fields>
+				</ssmanager_api>
+			</groups>
+		</ssmanager>
+	</sections>
+</config>

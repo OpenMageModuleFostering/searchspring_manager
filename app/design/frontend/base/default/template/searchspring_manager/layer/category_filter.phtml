@@ -1,0 +1,29 @@
+<?php
+/**
+ * Template for category filter items block
+ *
+ * @see SearchSpring_Manager_Block_Layer_Filter_SearchSpringCategory
+ */
+?>
+
+<ol>
+	<?php //TODO: Maybe we should make these some sort of category parent object instead of using raw category objects -James ?>
+	<?php $_parents = $this->getParents() ?>
+	<?php foreach($_parents as $_id => $_parent): ?>
+		<li class="ss-category_breadcrumb <?php echo ($_id == $this->getCurrentValue()) ? "ss-current_category":"" ?>">
+			<a href="<?php echo $this->urlEscape($_parent->getUrl()) ?>">
+				<?php echo ($_id == $this->getCurrentValue()) ? "":"&laquo;" ?> <?php echo $_parent->getName() ?>
+			</a>
+		</li>
+	<?php endforeach; ?>
+	<?php foreach ($this->getItems() as $_item): ?>
+		<li <?php echo $_item->isActive()?'active':'' ?>">
+			<a href="<?php echo $this->urlEscape($_item->getUrl()) ?>">
+				<?php echo $_item->getLabel() ?>
+				<?php if ($this->shouldDisplayProductCount()): ?>
+					<span class="count">(<?php echo $_item->getCount() ?>)</span>
+				<?php endif; ?>
+			</a>
+		</li>
+	<?php endforeach ?>
+</ol>

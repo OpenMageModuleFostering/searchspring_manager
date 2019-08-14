@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<SearchSpring_Manager>
+			<version>1.1.0</version>
+		</SearchSpring_Manager>
+	</modules>
+	<global>
+		<models>
+			<searchspring_manager>
+				<class>SearchSpring_Manager_Model</class>
+			</searchspring_manager>
+		</models>
+		<blocks>
+			<searchspring_manager>
+				<class>SearchSpring_Manager_Block</class>
+			</searchspring_manager>
+			<!-- Add back in for Category Page Management -->
+			<!-- <catalog> -->
+			<!-- 	<rewrite> -->
+			<!-- 		<layer_view>SearchSpring_Manager_Block_Layer_View</layer_view> -->
+			<!-- 	</rewrite> -->
+			<!-- </catalog> -->
+		</blocks>
+		<helpers>
+			<searchspring_manager>
+				<class>SearchSpring_Manager_Helper</class>
+			</searchspring_manager>
+		</helpers>
+		<events>
+			<catalog_product_save_after>
+				<observers>
+					<searchspring_manager_after_save_push_product>
+						<class>searchspring_manager/observer_productSaveObserver</class>
+						<method>afterSavePushProduct</method>
+					</searchspring_manager_after_save_push_product>
+				</observers>
+			</catalog_product_save_after>
+			<catalog_product_delete_before>
+				<observers>
+					<searchspring_manager_before_delete_push_product>
+						<class>searchspring_manager/observer_productSaveObserver</class>
+						<method>beforeDeletePushProduct</method>
+					</searchspring_manager_before_delete_push_product>
+				</observers>
+			</catalog_product_delete_before>
+			<catalog_product_delete_after_done>
+				<observers>
+					<searchspring_manager_after_delete_push_product>
+						<class>searchspring_manager/observer_productSaveObserver</class>
+						<method>afterDeletePushProduct</method>
+					</searchspring_manager_after_delete_push_product>
+				</observers>
+			</catalog_product_delete_after_done>
+			<catalog_category_save_after>
+				<observers>
+					<searchspring_manager_after_save_update_product_category>
+						<class>searchspring_manager/observer_categorySaveObserver</class>
+						<method>afterSaveUpdateProductCategory</method>
+					</searchspring_manager_after_save_update_product_category>
+				</observers>
+			</catalog_category_save_after>
+			<category_move>
+				<observers>
+					<searchspring_manager_after_move_update_product_category>
+						<class>searchspring_manager/observer_categorySaveObserver</class>
+						<method>afterMoveUpdateProductCategory</method>
+					</searchspring_manager_after_move_update_product_category>
+				</observers>
+			</category_move>
+			<catalog_category_change_products>
+				<observers>
+					<searchspring_manager_after_product_change_update_product_category>
+						<class>searchspring_manager/observer_categorySaveObserver</class>
+						<method>afterProductChangeUpdateProductCategory</method>
+					</searchspring_manager_after_product_change_update_product_category>
+				</observers>
+			</catalog_category_change_products>
+			<catalog_controller_category_delete>
+				<observers>
+					<searchspring_manager_after_delete_update_product_category>
+						<class>searchspring_manager/observer_categorySaveObserver</class>
+						<method>afterDeleteUpdateProductCategory</method>
+					</searchspring_manager_after_delete_update_product_category>
+				</observers>
+			</catalog_controller_category_delete>
+		</events>
+		<template>
+			<email>
+				<api_error module="searchspring_manager">
+					<label>API Error Template</label>
+					<file>searchspring_api_error.html</file>
+					<type>html</type>
+				</api_error>
+			</email>
+		</template>
+		<resources>
+			<searchspring_manager>
+				<setup>
+					<module>SearchSpring_Manager</module>
+					<class>Mage_Catalog_Model_Resource_Setup</class>
+				</setup>
+				<connection>
+					<use>core_setup</use>
+				</connection>
+			</searchspring_manager>
+		</resources>
+	</global>
+	<frontend>
+		<routers>
+			<searchspring>
+				<use>standard</use>
+				<args>
+					<module>SearchSpring_Manager</module>
+					<frontName>searchspring</frontName>
+				</args>
+			</searchspring>
+		</routers>
+		<!-- Add back in for Category Page Management -->
+		<!-- <layout> -->
+		<!-- 	<updates> -->
+		<!-- 		<searchspring_manager module="SearchSpring_Manager"> -->
+		<!-- 			<file>searchspring_manager.xml</file> -->
+		<!-- 		</searchspring_manager> -->
+		<!-- 	</updates> -->
+		<!-- </layout> -->
+	</frontend>
+	<default>
+		<ssmanager>
+			<ssmanager_general>
+				<live_indexing>0</live_indexing>
+			</ssmanager_general>
+			<ssmanager_catalog>
+				<enable_categories>0</enable_categories>
+			</ssmanager_catalog>
+		</ssmanager>
+	</default>
+</config>

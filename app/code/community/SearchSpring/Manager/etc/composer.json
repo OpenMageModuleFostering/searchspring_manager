@@ -1,0 +1,15 @@
+{
+	"name": "SearchSpring/Manager",
+	"license": "OSL-3.0",
+	"type": "magento-module",
+	"description": "Add your description here",
+	"require": {
+		"magento-hackathon/magento-composer-installer": "*"
+	},
+	"authors": [
+		{
+			"name": "Nate Brunette",
+			"email": "nate@b7interactive.com"
+		}
+	]
+}

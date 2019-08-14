@@ -1,0 +1,10 @@
+/** Add Styling Override Here **/
+
+.block-layered-nav dl dd ol > li.active > a {
+	font-weight: bold;
+}
+
+.ss-category_breadcrumb.ss-current_category {
+	font-weight: bold;
+	color: #2288bb;
+}

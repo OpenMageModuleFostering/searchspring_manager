@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<layout>
+
+	<catalog_category_layered>
+        <update handle="_searchspring_layered_navigation_override" />
+	</catalog_category_layered>
+
+	<_searchspring_layered_navigation_override>
+
+		<!-- Custom Templates -->
+
+		<reference name="catalog.leftnav">
+			<action method="setTemplate">
+				<template helper="searchspring_manager/getBlockTemplateIfCategoryEnabled">
+					<blockName>catalog.leftnav</blockName>
+					<newTemplate>searchspring_manager/layer/view.phtml</newTemplate>
+				</template>
+			</action>
+		</reference>
+
+		<reference name="product_list">
+			<action method="setTemplate">
+				<template helper="searchspring_manager/getBlockTemplateIfCategoryEnabled">
+					<blockName>product_list</blockName>
+					<newTemplate>searchspring_manager/product/list.phtml</newTemplate>
+				</template>
+			</action>
+		</reference>
+
+		<reference name="product_list_toolbar">
+			<action method="setTemplate">
+				<template helper="searchspring_manager/getBlockTemplateIfCategoryEnabled">
+					<blockName>product_list_toolbar</blockName>
+					<newTemplate>searchspring_manager/product/list/toolbar.phtml</newTemplate>
+				</template>
+			</action>
+		</reference>
+
+	</_searchspring_layered_navigation_override>
+
+</layout>

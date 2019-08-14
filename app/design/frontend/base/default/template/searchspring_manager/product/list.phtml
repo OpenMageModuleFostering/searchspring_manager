@@ -1,0 +1,37 @@
+<?php
+$_productCollection=$this->getLoadedProductCollection();
+$_results = $_productCollection->getResults();
+$_merchandisingContent = $_results->getMerchandisingContent();
+?>
+<?php if(!$_productCollection->count()): ?>
+	<p class="note-msg"><?php echo $this->__('There are no products matching the selection.') ?></p>
+<?php else: ?>
+	<div class="category-products">
+		<?php echo $this->getToolbarHtml() ?>
+
+		<div class="merchandising" id="searchspring-merch_header"><?php echo isset($_merchandisingContent->header)?$_merchandisingContent->header:'' ?></div>
+		<div class="merchandising" id="searchspring-merch_banner"><?php echo isset($_merchandisingContent->banner)?$_merchandisingContent->banner:'' ?></div>
+
+		<?php // List mode ?>
+		<?php if($this->getMode()!='grid'): ?>
+			<ol class="products-list" id="products-list">
+				<?php echo $_results->getResults(); ?>
+			</ol>
+			<script type="text/javascript">decorateList('products-list', 'none-recursive')</script>
+
+		<?php else: ?>
+
+		<?php // Grid Mode ?>
+			<ul class="products-grid">
+				<?php echo $_results->getResults(); ?>
+			</ul>
+			<script type="text/javascript">decorateGeneric($$('ul.products-grid'), ['odd','even','first','last'])</script>
+		<?php endif; ?>
+
+		<div class="merchandising" id="searchspring-merch_footer"><?php echo isset($_merchandisingContent->footer)?$_merchandisingContent->footer:'' ?></div>
+
+		<div class="toolbar-bottom">
+			<?php echo $this->getToolbarHtml() ?>
+		</div>
+	</div>
+<?php endif; ?>
