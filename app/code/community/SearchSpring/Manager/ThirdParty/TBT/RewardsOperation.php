@@ -35,7 +35,7 @@ class SearchSpring_Manager_ThirdParty_TBT_RewardsOperation extends SearchSpring_
 			$points = current($points);
 		}
 
-		$this->getRecords()->add('TBT_Rewards_earnable_points', $points);
+		$this->getRecords()->add('tbt_rewards_earnable_points', $points);
 
 		return $this;
 	}

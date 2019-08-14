@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<SearchSpring_Manager>
-			<version>1.10.0</version>
+			<version>1.10.2</version>
 		</SearchSpring_Manager>
 	</modules>
 	<global>
