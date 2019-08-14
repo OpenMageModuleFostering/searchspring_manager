@@ -78,7 +78,8 @@ class SearchSpring_Manager_Provider_ProductCollection_ProductProvider
         $collection->setStoreId($store->getId());
         $collection->addStoreFilter();
 
-		Mage::getSingleton('catalog/product_visibility')->addVisibleInSiteFilterToCollection($collection);
+		// Filter out products not visible on the site
+		$collection->addAttributeToFilter('visibility', array('neq' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE));
 
         if (null !== $this->requestParams) {
             $collection->getSelect()->limit($this->requestParams->getCount(), $this->requestParams->getOffset());

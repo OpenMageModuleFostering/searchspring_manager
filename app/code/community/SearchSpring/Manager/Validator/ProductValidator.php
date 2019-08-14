@@ -13,18 +13,6 @@
 class SearchSpring_Manager_Validator_ProductValidator implements Zend_Validate_Interface
 {
 	/**
-	 * An array of allowable product types for validation
-	 *
-	 * @var array $allowableTypes
-	 */
-	public static $allowableTypes = array(
-		Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
-		Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE,
-		Mage_Catalog_Model_Product_Type::TYPE_GROUPED,
-		Mage_Catalog_Model_Product_Type::TYPE_BUNDLE,
-	);
-
-	/**
 	 * SearchSpring configuration
 	 *
 	 * @var SearchSpring_Manager_Model_Config
@@ -119,11 +107,6 @@ class SearchSpring_Manager_Validator_ProductValidator implements Zend_Validate_I
 		// product must be enabled
 		if ((int)$product->getData('status') !== Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
 			$this->messages[] = 'Product is not enabled';
-		}
-
-		// product must be an allowed type
-		if (!in_array($product->getData('type_id'), self::$allowableTypes)) {
-			$this->messages[] = 'Product is not an allowable type.';
 		}
 
 		// product must be visible in either catalog and search
