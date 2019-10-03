@@ -1,3 +1,5 @@
+
+
 ## Original Package Description
 
 Connects your Magento store to SearchSpring's subscription-based site search and category navigation services.
